@@ -4,7 +4,7 @@ from sqlalchemy.orm import relationship
 from .database import Base
 
 
-class Users(Base):
+class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
@@ -12,9 +12,18 @@ class Users(Base):
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
 
-    # items = relationship("Item", back_populates="owner")
+    user_tokens = relationship("Token", back_populates="users")
 
-# class Users(BaseModel):
-#     id: UUID
-#     email: str = Field(min_length=5, max_length=254)
-#     password: str =  Field(min_length=1)
+
+class Token(Base):
+    __tablename__ = "tokens"
+
+    id = Column(Integer, primary_key=True)
+    bearer_token = Column(String)
+    bearer_token_expiration_time = Column(Boolean)
+    refresh_token = Column(String)
+    refresh_token_expiration_time = Column(Boolean)
+    user_id = Column(Integer, ForeignKey("users.id"))
+
+    users = relationship("User", back_populates="user_tokens")
+

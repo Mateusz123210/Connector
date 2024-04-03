@@ -1,9 +1,21 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from cryptography.fernet import Fernet
 
-# SQLALCHEMY_DATABASE_URL = "sqlite:///./sql_app.db"
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:qmjHscOVU$n1NIQK@localhost:5432"
+key = b'wLVkugNZXHJESDEarg_xUnc7JHaUck1lkGECooRD2OA='
+f = Fernet(key)
+
+with open("./app/keys/db_key.env", "rb") as encrypted_file:
+    encrypted = encrypted_file.read()
+
+decrypted = f.decrypt(encrypted).decode("utf-8")
+
+SQLALCHEMY_DATABASE_URL = decrypted
+# SQLALCHEMY_DATABASE_URL = "postgresql://postgres:qmjHscOVU$n1NIQK@localhost:5432"
+
+# TO DO Connecting with database using SSL/TLS
+
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL

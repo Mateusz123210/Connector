@@ -8,6 +8,7 @@ from .database import SessionLocal, engine
 from sqlalchemy.orm import Session
 from . import crud
 from .database import Base
+from app.mail.mail_sender_executor import MailSenderExecutor
 
 background_tasks = None
 data = []
@@ -16,7 +17,9 @@ Base.metadata.create_all(bind=engine)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     data.append(BackgroundTasks())
+    data.append(MailSenderExecutor())
     yield
+    data[1].quit_connection_with_email_server()
     data.clear()
 
 
@@ -26,8 +29,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
 
 app = FastAPI(lifespan = lifespan)
 
@@ -41,28 +42,22 @@ async def register(db: Session = Depends(get_db)):
     # return crud.create_user(db=db, user=user)
 
 
-
-
-
-
-
-
-    # mail_sender.send_email_with_verification_code_for_registration(data[0], '252808@student.pwr.edu.pl', '108356') 
+    mail_sender.send_email_with_verification_code_for_registration(data[0], data[1], '252808@student.pwr.edu.pl', '108356') 
 
     return {}
-# 
+
 @app.post("/login")
-async def login():
-    mail_sender.send_email_with_verification_code_for_login(data[0], '252808@student.pwr.edu.pl', '108356') 
+async def login(db: Session = Depends(get_db)):
+    # mail_sender.send_email_with_verification_code_for_login(data[0], '252808@student.pwr.edu.pl', '108356') 
     return {}
 
 @app.post("/reset-password")
-async def reset_password():
-    mail_sender.send_email_with_verification_code_for_password_reset(data[0], '252808@student.pwr.edu.pl', '108356') 
+async def reset_password(db: Session = Depends(get_db)):
+    # mail_sender.send_email_with_verification_code_for_password_reset(data[0], '252808@student.pwr.edu.pl', '108356') 
     return {}
 
 @app.post("/logout")
-async def logout():
+async def logout(db: Session = Depends(get_db)):
     pass
 
 @app.post("/send-message")
