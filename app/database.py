@@ -9,10 +9,7 @@ f = Fernet(key)
 with open("./app/keys/db_key.env", "rb") as encrypted_file:
     encrypted = encrypted_file.read()
 
-decrypted = f.decrypt(encrypted).decode("utf-8")
-
-SQLALCHEMY_DATABASE_URL = decrypted
-# SQLALCHEMY_DATABASE_URL = "postgresql://postgres:qmjHscOVU$n1NIQK@localhost:5432"
+SQLALCHEMY_DATABASE_URL = f.decrypt(encrypted).decode("utf-8")
 
 # TO DO Connecting with database using SSL/TLS
 

@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 
 class Email(BaseModel):
@@ -6,7 +7,7 @@ class Email(BaseModel):
 
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class BasicAuthentication(Email):
@@ -14,5 +15,13 @@ class BasicAuthentication(Email):
 
 
     class Config:
-        orm_mode = True
-    
+        from_attributes = True
+
+
+class UserCreate(BasicAuthentication):
+    confirmation_code: str
+    confirmation_code_expiration_time: datetime
+
+
+    class Config:
+        from_attributes = True
