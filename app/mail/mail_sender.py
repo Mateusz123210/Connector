@@ -9,7 +9,7 @@ def send_email_with_verification_code_for_registration(executor: MailSenderExecu
                 <div style="margin: 0 auto; width: 90%; text-align: center;">
                     <h1 style="background-color: rgba(35, 23, 160, 1); padding: 5px 10px; border-radius: 5px; color: #0DA2F2;">Potwierdź swoją rejestrację w aplikacji Connector</h1>
                     <div style="margin: 30px auto; background: white; width: 40%; border-radius: 10px; padding: 50px; text-align: center;">
-                        <h3 style="margin-bottom: 100px; font-size: 24px;">Twój kod autoryzacyjny to: <br />{verification_code}</h3>
+                        <h3 style="margin-bottom: 50px; font-size: 24px;">Twój kod autoryzacyjny to: <br /><br /><b><span style="color:#0DA2F2">{verification_code}<span /><b /></h3>
                         <p style="margin-bottom: 30px;">Aby dokończyć rejestrację, skopiuj kod i wpisz w aplikacji.<br />Jeżeli to nie ty chciałeś/aś założyć konto, zignoruj tę wiadomość.</p>
                     </div>
                 </div>
@@ -27,7 +27,7 @@ def send_email_with_verification_code_for_login(executor: MailSenderExecutor, re
                 <div style="margin: 0 auto; width: 90%; text-align: center;">
                     <h1 style="background-color: rgba(35, 23, 160, 1); padding: 5px 10px; border-radius: 5px; color: #0DA2F2;">Potwierdź logowanie do aplikacji Connector</h1>
                     <div style="margin: 30px auto; background: white; width: 40%; border-radius: 10px; padding: 50px; text-align: center;">
-                        <h3 style="margin-bottom: 100px; font-size: 24px;">Twój kod autoryzacyjny to: <br />{verification_code}</h3>
+                        <h3 style="margin-bottom: 50px; font-size: 24px;">Twój kod autoryzacyjny to: <br /><br /><b><span style="color:#0DA2F2">{verification_code}<span /><b /></h3>
                         <p style="margin-bottom: 30px;">Aby potwierdzić logowanie, skopiuj kod i wpisz w aplikacji.<br />Jeżeli to nie ty chciałeś/aś się zalogować, zignoruj tę wiadomość.</p>
                     </div>
                 </div>
@@ -46,7 +46,7 @@ def send_email_with_verification_code_for_password_reset(executor: MailSenderExe
                 <div style="margin: 0 auto; width: 90%; text-align: center;">
                     <h1 style="background-color: rgba(35, 23, 160, 1); padding: 5px 10px; border-radius: 5px; color: #0DA2F2;">Potwierdź zmianę hasła do aplikacji Connector</h1>
                     <div style="margin: 30px auto; background: white; width: 40%; border-radius: 10px; padding: 50px; text-align: center;">
-                        <h3 style="margin-bottom: 100px; font-size: 24px;">Twój kod autoryzacyjny to: <br />{verification_code}</h3>
+                        <h3 style="margin-bottom: 50px; font-size: 24px;">Twój kod autoryzacyjny to: <br /><br /><b><span style="color:#0DA2F2">{verification_code}<span /><b /></h3>
                         <p style="margin-bottom: 30px;">Aby potwierdzić zmianę hasła, skopiuj kod i wpisz w aplikacji.<br />Jeżeli to nie ty chciałeś/aś zmienić hasło, zignoruj tę wiadomość.</p>
                     </div>
                 </div>

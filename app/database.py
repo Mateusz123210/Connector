@@ -17,6 +17,6 @@ SQLALCHEMY_DATABASE_URL = f.decrypt(encrypted).decode("utf-8")
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL
 )
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionMaker = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()

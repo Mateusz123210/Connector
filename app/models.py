@@ -9,7 +9,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
+    password = Column(String)
     is_active = Column(Boolean, default=True)
     confirmation_code = Column(String)
     confirmation_code_expiration_time = Column(DateTime)
@@ -21,8 +21,8 @@ class Token(Base):
     __tablename__ = "tokens"
 
     id = Column(Integer, primary_key=True)
-    bearer_token = Column(String)
-    bearer_token_expiration_time = Column(DateTime)
+    access_token = Column(String)
+    access_token_expiration_time = Column(DateTime)
     refresh_token = Column(String)
     refresh_token_expiration_time = Column(DateTime)
     user_id = Column(Integer, ForeignKey("users.id"))

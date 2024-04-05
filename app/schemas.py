@@ -25,3 +25,12 @@ class UserCreate(BasicAuthentication):
 
     class Config:
         from_attributes = True
+
+
+class UserSchema(UserCreate):
+    confirmation_code: str
+    confirmation_code_expiration_time: datetime
+
+
+    class Config:
+        from_attributes = True
