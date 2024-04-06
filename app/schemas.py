@@ -17,6 +17,10 @@ class BasicAuthentication(Email):
     class Config:
         from_attributes = True
 
+class BasicConfirmation(Email):
+    access_token: str
+    verification_code: str
+
 
 class UserCreate(BasicAuthentication):
     confirmation_code: str

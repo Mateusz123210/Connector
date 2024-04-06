@@ -43,3 +43,16 @@ def delete_user(user, db):
         db.delete(token)
     db.delete(user)
     db.flush()
+
+@db
+def delete_user_tokens(user, db):
+    print(user.id)
+    user_tokens = db.query(models.Token).filter(models.Token.user_id==user.id)
+    for token in user_tokens:
+        db.delete(token)
+    db.delete(user)
+    db.flush()
+
+@db
+def get_user_tokens(user, db):
+    return db.query(models.Token).filter(models.Token.user_id == user.id).all()

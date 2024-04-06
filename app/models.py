@@ -8,11 +8,11 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
-    email = Column(String, unique=True, index=True)
-    password = Column(String)
-    is_active = Column(Boolean, default=True)
-    confirmation_code = Column(String)
-    confirmation_code_expiration_time = Column(DateTime)
+    email = Column(String, unique=True, index=True, nullable=False)
+    password = Column(String, nullable=False)
+    is_active = Column(Boolean, default=False, nullable=False)
+    confirmation_code = Column(String, nullable=True)
+    confirmation_code_expiration_time = Column(DateTime, nullable=True)
 
     user_tokens = relationship("Token", back_populates="users")
 
@@ -21,11 +21,11 @@ class Token(Base):
     __tablename__ = "tokens"
 
     id = Column(Integer, primary_key=True)
-    access_token = Column(String)
-    access_token_expiration_time = Column(DateTime)
-    refresh_token = Column(String)
-    refresh_token_expiration_time = Column(DateTime)
-    user_id = Column(Integer, ForeignKey("users.id"))
+    access_token = Column(String, nullable=False)
+    access_token_expiration_time = Column(DateTime, nullable=False)
+    refresh_token = Column(String, nullable=True)
+    refresh_token_expiration_time = Column(DateTime, nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     users = relationship("User", back_populates="user_tokens")
 

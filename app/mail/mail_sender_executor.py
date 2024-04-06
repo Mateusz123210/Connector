@@ -23,10 +23,10 @@ class MailSenderExecutor():
     
     def start_connection_with_email_server(self):
         self.server = smtplib.SMTP(self.smtp_server, self.port)
-        self.server.ehlo()
-        self.server.starttls(context=self.context)
-        self.server.ehlo()
-        self.server.login(self.sender_email, self.password)
+        # self.server.ehlo()
+        # self.server.starttls(context=self.context)
+        # self.server.ehlo()
+        # self.server.login(self.sender_email, self.password)
 
     def quit_connection_with_email_server(self):
         self.server.quit()
