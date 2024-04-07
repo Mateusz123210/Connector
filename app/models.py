@@ -27,6 +27,11 @@ class Token(Base):
     refresh_token = Column(String, nullable=True)
     refresh_token_expiration_time = Column(DateTime, nullable=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    verification_code = Column(String, nullable=True)
+    verification_code_expiration_time = Column(DateTime, nullable=True)
+    verification_code_enter_attempts = Column(Integer, nullable=False, default=0)
+    verification_code_type = Column(String, nullable=True)
+    logged = Column(Boolean, nullable=False, default=False)
 
     users = relationship("User", back_populates="user_tokens")
 

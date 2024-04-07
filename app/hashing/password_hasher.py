@@ -18,4 +18,4 @@ class PasswordHasher():
         hash = hashlib.sha512()
         hash.update(self.salt)
         hash.update(password.encode("utf-8"))
-        return base64.urlsafe_b64encode(hash.digest())
+        return base64.urlsafe_b64encode(hash.digest()).decode("utf-8")

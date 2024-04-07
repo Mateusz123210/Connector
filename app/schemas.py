@@ -17,6 +17,7 @@ class BasicAuthentication(Email):
     class Config:
         from_attributes = True
 
+
 class BasicConfirmation(Email):
     access_token: str
 
@@ -73,11 +74,22 @@ class UserSchema(UserCreate):
         from_attributes = True
 
 
-class TokenSchema():
+class TokenSchema(BaseModel):
     access_token: str
     access_token_expiration_time: datetime
     refresh_token: str
     refresh_token_expiration_time: datetime
+
+
+    class Config:
+        from_attributes = True
+
+
+class TokenSchemaWithVerificationCode(TokenSchema):
+    verification_code: str
+    verification_code_expiration_time: datetime
+    verification_code_enter_attempts: int
+    verification_code_type: str
 
 
     class Config:
