@@ -12,8 +12,7 @@ from app.decorators.database import transactional
 import pytz
 from jose import jwt
 from .utils import (
-    ALGORITHM#,
-    # JWT_SECRET_KEY
+    ALGORITHM
 )
 from pydantic import ValidationError
 
@@ -26,58 +25,128 @@ def register(data: BasicAuthentication):
     if db_user:
         utc=pytz.UTC
         datetime_now = datetime.now(UTC)
-        confirmation_code_expiration_time = utc.localize(db_user.confirmation_code_expiration_time)
+        confirmation_code_expiration_time = utc.localize(db_user.registration_confirmation_code_expiration_time)
 
         if db_user.is_active == False and \
-            datetime_now > confirmation_code_expiration_time:
+            (datetime_now > confirmation_code_expiration_time or 
+            db_user.registration_confirmation_code_enter_attempts >=3):
             crud.delete_user(db_user)
             
         else:
             raise HTTPException(status_code=400, detail="Email unavailable to " + 
                                 str(confirmation_code_expiration_time) + "UTC due to not confirmation!")
-
+        
     if main.objects[2].validate_password(data.password) is False:
         raise HTTPException(status_code=400, detail="Invalid password")
     
     hashed_password = main.objects[1].hash_password(data.password)
     verification_code = verification_code_generator.generate_verification_code()
-    verification_code_expiration_time = datetime.now(UTC) + timedelta(minutes=5)
+    verification_code_expiration_time = datetime.now(UTC) + timedelta(minutes=15)
     access_token_key = jwt_token_generator.generate_jwt_secret_key()
-    refresh_token_key = jwt_token_generator.generate_jwt_secret_key()
-
-    db_user = crud.create_user(UserCreate(email=data.email, password=hashed_password, confirmation_code=verification_code,
+    db_user = crud.create_user(UserCreate(email=data.email, password=hashed_password, 
+                                          confirmation_code=verification_code,
                                 confirmation_code_expiration_time=verification_code_expiration_time))
     access_token = create_access_token(data.email, access_token_key)
-    refresh_token = create_refresh_token(data.email, refresh_token_key)
-    access_token_expiration_time = datetime.now(UTC) + timedelta(minutes=5)
-    refresh_token_expiration_time = datetime.now(UTC) + timedelta(minutes=60*24)
-    crud.create_user_tokens(db_user=db_user.id, access_token=access_token_key, refresh_token=refresh_token_key, 
+    access_token_expiration_time = datetime.now(UTC) + timedelta(minutes=15)
+    crud.create_user_tokens(db_user=db_user.id, access_token=access_token_key, refresh_token=None, 
                             access_token_expiration_time=access_token_expiration_time,
-                            refresh_token_expiration_time=refresh_token_expiration_time)
+                            refresh_token_expiration_time=None)
     
-    # mail_sender.send_email_with_verification_code_for_registration(main.objects[0], '252808@student.pwr.edu.pl', 
-    #                                                                verification_code)
-    print(verification_code) 
+    mail_sender.send_email_with_verification_code_for_registration(main.objects[0], data.email, 
+                                                                   verification_code)
+    print(verification_code)
 
     return {"message": "Confirm registration",
-            "access_token": access_token,
-            "refresh_token": refresh_token}
+            "access_token": access_token}
+
+def confirm_registration1(data: BasicConfirmationWithVerificationCode):
+    result = confirm_registration(data)
+    if "exception" in result.keys():
+        raise HTTPException(status_code=403, detail=result["exception"])
+    else:
+        return result
 
 @transactional
-def confirm_registration(data: BasicConfirmation):
-    print("verification")
-    print(data)
-    # user = crud.get_user_by_email(email=data.email)
-    # print(user)
-    # if user.confirmation_code != data.verification_code:
-    #     raise HTTPException(status_code=400, detail="Invalid verification code")
-    #TO DO Too many attempts to verify verification_code
+def confirm_registration(data: BasicConfirmationWithVerificationCode):
+    user = crud.get_user_by_email(email=data.email)
+    if user is None:
+        raise HTTPException(status_code=403, detail="User does not exist!")
+    if user.is_active is True:
+        raise HTTPException(status_code=403, detail="User is active!")
+    utc=pytz.UTC
+    verification_timeout = utc.localize(user.registration_confirmation_code_expiration_time)
+    datetime_now = datetime.now(UTC)
+    if datetime_now > verification_timeout:
+        crud.delete_user(user) 
+        return {"exception": "Verification code expired"}
+    if user.registration_confirmation_code_enter_attempts >= 2:
+        if user.registration_confirmation_code != data.verification_code:
+            crud.delete_user(user) 
+            return {"exception": "Too many atempts. Account deleted"}
+    if user.registration_confirmation_code != data.verification_code:
+        crud.add_verification_code_attempt(user) 
+        return {"exception": "Invalid verification code"}
+    crud.activate_user(user)
+    crud.delete_user_tokens(user)
 
+    return {"message": "User activated"}
 
+@transactional
+def refresh_token(data):
+    db_user = crud.get_user_by_email(email=data.email)
+    db_user_tokens = crud.get_user_tokens(db_user)
+    found_token = None
 
+    found = False
+    expired = True
 
+    for db_token in db_user_tokens:
+        try:
+            payload = jwt.decode(
+                data.refresh_token, db_token.refresh_token, algorithms=[ALGORITHM]
+            )
+            if payload["sub"] == data.email:
+                found = True
+                utc=pytz.UTC
+                datetime_now = datetime.now(UTC)
+                token_expiration_time = utc.localize(db_token.refresh_token_expiration_time)
+                if datetime_now <= token_expiration_time:
+                    expired = False       
+                    found_token = db_token         
+    
+        except(jwt.JWTError, ValidationError):
+            pass
+        
+    if found is False:
+        raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Could not validate credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    if expired is True:
+        raise HTTPException(
+                status_code = status.HTTP_401_UNAUTHORIZED,
+                detail="Token expired",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
 
-    return {}
+    access_token_key = jwt_token_generator.generate_jwt_secret_key()
+    refresh_token_key = jwt_token_generator.generate_jwt_secret_key()
+    access_token = create_access_token(data.email, access_token_key)
+    refresh_token = create_refresh_token(data.email, refresh_token_key)
+    access_token_expiration_time = datetime.now(UTC) + timedelta(minutes=15)
+    refresh_token_expiration_time = datetime.now(UTC) + timedelta(minutes=60*24)
+
+    new_token = TokenSchema()
+    new_token.access_token=access_token_key
+    new_token.access_token_expiration_time= access_token_expiration_time
+    new_token.refresh_token=refresh_token_key
+    new_token.refresh_token_expiration_time=refresh_token_expiration_time
+    crud.update_token(found_token, new_token)
+
+    return {"message": "Token updated",
+            "access_token": access_token,
+            "refresh_token": refresh_token}
 
 @transactional
 def login(data: OAuth2PasswordRequestForm = Depends()):
@@ -111,8 +180,9 @@ def login(data: OAuth2PasswordRequestForm = Depends()):
             "refresh_token": refresh_token}
 
 @transactional
-def confirm_login( ):
-    
+def confirm_login(data: BasicConfirmationWithVerificationCode):
+    print(data.verification_code)
+    print("login confirmed")
 
     return {}
 
@@ -128,26 +198,29 @@ def reset_password():
     return {}
 
 @transactional
-def confirm_reset_password( ):
+def confirm_reset_password(data: BasicConfirmationWithVerificationCode):
     
-
+    print("reset confirmed")
     return {}
 
 @transactional
-def logout():
+def logout(data: BasicConfirmation):
+    print("logout")
     return {}
 
 @transactional
-def send_message():
+def send_message(data: BasicConfirmationForMessageSend):
+    print("message sent")
     return {}
 
 @transactional
-def get_messages():
-    print("messages")
+def get_messages(data: BasicConfirmationForMessageFetch):
+    print("message got")
     return {}
 
 @transactional
-def validate_user_token(data: BasicConfirmation):
+def validate_user_token(data):
+
     db_user = crud.get_user_by_email(email=data.email)
     db_user_tokens = crud.get_user_tokens(db_user)
 
@@ -183,6 +256,7 @@ def validate_user_token(data: BasicConfirmation):
                 headers={"WWW-Authenticate": "Bearer"},
             )
     return data
+
 
 
 

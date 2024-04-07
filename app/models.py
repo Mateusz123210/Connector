@@ -11,8 +11,9 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     password = Column(String, nullable=False)
     is_active = Column(Boolean, default=False, nullable=False)
-    confirmation_code = Column(String, nullable=True)
-    confirmation_code_expiration_time = Column(DateTime, nullable=True)
+    registration_confirmation_code = Column(String, nullable=True)
+    registration_confirmation_code_expiration_time = Column(DateTime, nullable=True)
+    registration_confirmation_code_enter_attempts = Column(Integer, nullable=False, default=0)
 
     user_tokens = relationship("Token", back_populates="users")
 
