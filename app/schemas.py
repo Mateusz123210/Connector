@@ -20,6 +20,14 @@ class MessagesFetching(BaseModel):
         from_attributes = True
 
 
+class MessagesDeleting(BaseModel):
+    user: str
+
+
+    class Config:
+        from_attributes = True
+
+
 
 
 

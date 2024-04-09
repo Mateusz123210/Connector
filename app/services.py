@@ -39,4 +39,13 @@ def send_message(data):
 
     return {"message": "Message sent!"}
 
-
+def delete_messages(data):
+    found_conversation = collection_name.find_one_and_delete({"first_user": data["user"]})
+    if found_conversation:
+        return {"message": "User messages has been deleted!"}
+    else:
+        found_conversation = collection_name.find_one_and_delete({"second_user": data["user"]})
+        if found_conversation:
+            return {"message": "User messages has been deleted!"}
+        else:
+            return {"message": "User had no sended messages!"}
