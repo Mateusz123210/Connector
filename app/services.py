@@ -16,7 +16,7 @@ def get_messages(data, session):
             list1 = found_conversation["message"]
             return {"messages": list1}
         else:
-            return {"message": "No messages sent to this receiver yet!"}
+            raise HTTPException(status_code=204)
 
 @transactional
 def send_message(data, session):
@@ -57,3 +57,4 @@ def delete_messages(data, session):
             return {"message": "User messages has been deleted!"}
         else:
             return {"message": "User had no sended messages!"}
+        
