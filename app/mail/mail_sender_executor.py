@@ -7,6 +7,9 @@ from cryptography.fernet import Fernet
 class MailSenderExecutor():
 
     def __init__(self):
+        self.load()
+    
+    def load(self):
         self.port= 587
         self.smtp_server = 'smtp.office365.com'
         self.sender_email = 'connector.communicator@outlook.com'

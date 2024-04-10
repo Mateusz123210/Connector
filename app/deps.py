@@ -15,3 +15,7 @@ async def validate_user_token_for_message_fetch(data: BasicConfirmationForMessag
 
 async def validate_user_token_for_delete_account(data: BasicConfirmationForDeleteAccount) :
     return services.validate_user_token(data)
+
+async def validate_user_token_for_aes_fetch(data: BasicConfirmationForFetchingAES) :
+    return services.validate_user_token_with_verification_if_user_logged(data)
+

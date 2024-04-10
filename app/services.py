@@ -10,6 +10,7 @@ from app.random_numbers import jwt_token_generator
 from app.schemas import *
 from app import main
 from app.decorators.database import transactional
+from app.aes import aes_generator
 import pytz
 from jose import jwt
 from .utils import (
@@ -65,9 +66,14 @@ def register(data: BasicAuthentication):
                             access_token_expiration_time=access_token_expiration_time,
                             refresh_token_expiration_time=None)
     
-    mail_sender.send_email_with_verification_code_for_registration(main.objects[0], data.email, 
+    try:
+        mail_sender.send_email_with_verification_code_for_registration(main.objects[0], data.email, 
                                                                    verification_code)
-    print(verification_code)
+    except Exception:
+        raise HTTPException(
+                status_code=500,
+                detail="Internal Server Error",
+            )    
 
     return {"message": "Confirm registration",
             "access_token": access_token}
@@ -186,7 +192,6 @@ def login(data: OAuth2PasswordRequestForm = Depends()):
 
     verification_code = verification_code_generator.generate_verification_code()
     verification_code_expiration_time = datetime.now(UTC) + timedelta(minutes=15)
-    print(verification_code) 
     access_token_key = jwt_token_generator.generate_jwt_secret_key()
     while check_access_token_key(db_user, access_token_key) is False:
         access_token_key = jwt_token_generator.generate_jwt_secret_key()
@@ -199,7 +204,13 @@ def login(data: OAuth2PasswordRequestForm = Depends()):
                             verification_code_expiration_time=verification_code_expiration_time,
                             verification_code_type="login")
 
-    mail_sender.send_email_with_verification_code_for_login(main.objects[0], email, verification_code) 
+    try:
+        mail_sender.send_email_with_verification_code_for_login(main.objects[0], email, verification_code)
+    except Exception:
+        raise HTTPException(
+                status_code=500,
+                detail="Internal Server Error",
+            ) 
     return {"message": "Confirm login",
             "access_token": access_token}
 
@@ -290,82 +301,6 @@ def confirm_login(data: BasicConfirmationWithVerificationCode):
             "access_token": access_token,
             "refresh_token": refresh_token}
 
-# @transactional
-# def reset_password(data: OAuth2PasswordRequestForm = Depends()):
-#     # email = data.username    
-#     # db_user = crud.get_user_by_email(email=email)
-#     # if db_user is None:
-#     #     raise HTTPException(status_code=400, detail="Invalid username or password")
-#     # if db_user.is_active is False:
-#     #     raise HTTPException(status_code=403, detail="User is not active!")
-#     # if main.objects[2].validate_password(data.password) is False:
-#     #     raise HTTPException(status_code=400, detail="New password is invalid")
-#     # hashed_password = main.objects[1].hash_password(data.password)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#     # verification_code = verification_code_generator.generate_verification_code()
-#     # verification_code_expiration_time = datetime.now(UTC) + timedelta(minutes=15)
-#     # print(verification_code) 
-#     # access_token_key = jwt_token_generator.generate_jwt_secret_key()
-#     # while check_access_token_key(db_user, access_token_key) is False:
-#     #     access_token_key = jwt_token_generator.generate_jwt_secret_key()
-#     # access_token_expiration_time = datetime.now(UTC) + timedelta(minutes=15)
-#     # access_token = create_access_token(email, access_token_key)
-
-#     # crud.create_user_tokens2(db_user=db_user.id, access_token=access_token_key, refresh_token=None, 
-#     #                         access_token_expiration_time=access_token_expiration_time,
-#     #                         refresh_token_expiration_time=None,verification_code=verification_code,
-#     #                         verification_code_expiration_time=verification_code_expiration_time,
-#     #                         verification_code_type="login")
-
-#     # mail_sender.send_email_with_verification_code_for_password_reset(main.objects[0], email, verification_code)
-    
-#     # verification_code = verification_code_generator.generate_verification_code()
-#     # print(verification_code) 
-
-#     # return {"message": "Confirm reset_password",
-#     #         "access_token": access_token}
-#     return {}
-
-# @transactional
-# def confirm_reset_password(data: BasicConfirmationWithVerificationCode):
-    
-#     print("reset confirmed")
-#     return {}
-
-# @transactional
-# def change_password():
-
-
-
-
-#     verification_code = verification_code_generator.generate_verification_code()
-#     print(verification_code) 
-#     # mail_sender.send_email_with_verification_code_for_password_reset(main.objects[0], '252808@student.pwr.edu.pl', verification_code) 
-#     return {}
-
-# @transactional
-# def confirm_change_password(data: BasicConfirmationWithVerificationCode):
-    
-#     print("reset confirmed")
-#     return {}
-
-
-
 @transactional
 def delete_account(data: BasicConfirmationForDeleteAccount):
     email = data.email    
@@ -377,7 +312,17 @@ def delete_account(data: BasicConfirmationForDeleteAccount):
     hashed_password = main.objects[1].hash_password(data.password)
     if hashed_password != db_user.password:
         raise HTTPException(status_code=400, detail="Invalid username or password")
-    crud.delete_user(db_user)
+    crud.delete_user_with_keys(db_user)
+
+    send_data= {"user": data.email, "token": token}
+
+    try:
+        httpx.post(url=second_server_url + "delete-messages", json = send_data)
+    except Exception:
+        raise HTTPException(
+                status_code=500,
+                detail="Internal Server Error",
+            )
     return {"message": "Account deleted"}
 
 @transactional
@@ -541,7 +486,7 @@ def validate_user_token_with_verification_if_user_logged(data):
 
 @transactional
 def send_message(data: BasicConfirmationForMessageSend):
-    receiver = crud.get_user_by_email(data.email)
+    receiver = crud.get_user_by_email(data.receiver)
     if receiver is None:
         raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -556,8 +501,59 @@ def send_message(data: BasicConfirmationForMessageSend):
     send_data= {"first_user": data.email, "second_user": data.receiver, "message": data.message,
              "token": token}
 
-    response = httpx.post(url=second_server_url + "send-message", json = send_data)
+    try:
+        response = httpx.post(url=second_server_url + "send-message", json = send_data)
+    except Exception:
+        raise HTTPException(
+                status_code=500,
+                detail="Internal Server Error",
+            )
+    
+    if response.status_code != 200:
+        json_answer = None
+        try:
+            json_answer = (response.json())["detail"]
+        except Exception as e:
+            json_answer = response.json()
+            
+        raise HTTPException(
+                status_code=response.status_code,
+                detail=json_answer,
+            )
+    
+    elif response.status_code >= 500:
+        raise HTTPException(
+                status_code=500,
+                detail="Internal Server Error",
+            )
+    
+    else:
+        return JSONResponse(status_code=response.status_code, content=response.json())
 
+@transactional
+def get_messages(data: BasicConfirmationForMessageFetch):
+    receiver = crud.get_user_by_email(data.caller)
+    if receiver is None:
+        raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="There is no register user with this email (bad receiver)!",
+            )
+    if receiver.is_active is False:
+        raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="There is no register user with this email (bad receiver)!",
+            )
+
+    send_data= {"first_user": data.email, "second_user": data.caller, "token": token}
+
+    try:
+        response = httpx.post(url=second_server_url + "get-messages", json = send_data)
+    except Exception:
+        raise HTTPException(
+                status_code=500,
+                detail="Internal Server Error",
+            )
+    
     if response.status_code != 200 and response.status_code != 204:
         json_answer = None
         try:
@@ -569,17 +565,121 @@ def send_message(data: BasicConfirmationForMessageSend):
                 status_code=response.status_code,
                 detail=json_answer,
             )
+    
     elif response.status_code >= 500:
         raise HTTPException(
                 status_code=500,
                 detail="Internal Server Error",
             )
+    
     else:
         return JSONResponse(status_code=response.status_code, content=response.json())
 
 @transactional
-def get_messages(data: BasicConfirmationForMessageFetch):
-    print("message got")
-    return {}
+def get_aes_key(data):
+    receiver = crud.get_user_by_email(data.receiver)
+    if receiver is None:
+        raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="There is no register user with this email (bad receiver)!",
+            )
+    if receiver.is_active is False:
+        raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="There is no register user with this email (bad receiver)!",
+            )
+    user = crud.get_user_by_email(data.email)
+    if user is None:
+        raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="There is no register user with this email!",
+            )
+    
+    found_aes_key = crud.get_key(user, receiver)
+    if found_aes_key:
+        return {"key": found_aes_key.aes_key}
+    else:
+        found_aes_key = crud.get_key(receiver, user)
+        if found_aes_key:
+            return {"key": found_aes_key.aes_key}
+        else:
+            key = aes_generator.get_random_key()
+            crud.add_key(user, receiver, key)
+            return {"key": key}
+
+# @transactional
+# def reset_password(data: OAuth2PasswordRequestForm = Depends()):
+#     # email = data.username    
+#     # db_user = crud.get_user_by_email(email=email)
+#     # if db_user is None:
+#     #     raise HTTPException(status_code=400, detail="Invalid username or password")
+#     # if db_user.is_active is False:
+#     #     raise HTTPException(status_code=403, detail="User is not active!")
+#     # if main.objects[2].validate_password(data.password) is False:
+#     #     raise HTTPException(status_code=400, detail="New password is invalid")
+#     # hashed_password = main.objects[1].hash_password(data.password)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#     # verification_code = verification_code_generator.generate_verification_code()
+#     # verification_code_expiration_time = datetime.now(UTC) + timedelta(minutes=15)
+#     #  
+#     # access_token_key = jwt_token_generator.generate_jwt_secret_key()
+#     # while check_access_token_key(db_user, access_token_key) is False:
+#     #     access_token_key = jwt_token_generator.generate_jwt_secret_key()
+#     # access_token_expiration_time = datetime.now(UTC) + timedelta(minutes=15)
+#     # access_token = create_access_token(email, access_token_key)
+
+#     # crud.create_user_tokens2(db_user=db_user.id, access_token=access_token_key, refresh_token=None, 
+#     #                         access_token_expiration_time=access_token_expiration_time,
+#     #                         refresh_token_expiration_time=None,verification_code=verification_code,
+#     #                         verification_code_expiration_time=verification_code_expiration_time,
+#     #                         verification_code_type="login")
+
+#     # mail_sender.send_email_with_verification_code_for_password_reset(main.objects[0], email, verification_code)
+    
+#     # verification_code = verification_code_generator.generate_verification_code()
+#     #  
+
+#     # return {"message": "Confirm reset_password",
+#     #         "access_token": access_token}
+#     return {}
+
+# @transactional
+# def confirm_reset_password(data: BasicConfirmationWithVerificationCode):
+    
+#     print("reset confirmed")
+#     return {}
+
+# @transactional
+# def change_password():
+
+
+
+
+#     verification_code = verification_code_generator.generate_verification_code()
+#      
+#     # mail_sender.send_email_with_verification_code_for_password_reset(main.objects[0], '252808@student.pwr.edu.pl', verification_code) 
+#     return {}
+
+# @transactional
+# def confirm_change_password(data: BasicConfirmationWithVerificationCode):
+    
+#     print("reset confirmed")
+#     return {}
+
 
 

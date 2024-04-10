@@ -33,6 +33,13 @@ class BasicConfirmation(Email):
         from_attributes = True
 
 
+class BasicConfirmationForFetchingAES(BasicConfirmation):
+    receiver: str
+
+    class Config:
+        from_attributes = True
+
+
 class RefreshToken(Email):
     refresh_token: str
 

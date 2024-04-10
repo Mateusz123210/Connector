@@ -78,13 +78,39 @@ def delete_user(user, db):
     db.flush()
 
 @db
-def delete_token(token: models.Token, db):
-    # user_tokens = db.query(models.Token).filter(models.Token.user_id==user.id)
-    # for token in user_tokens:
-    #     db.delete(token)
-    db.delete(token)
+def delete_user_with_keys(user, db):
+    user_tokens = db.query(models.Token).filter(models.Token.user_id==user.id)
+    for token in user_tokens:
+        db.delete(token)
+    
+    user_keys = db.query(models.Key).filter(models.Key.first_user_id==user.id)
+    for key in user_keys:
+        db.delete(key)
+    
+    user_keys = db.query(models.Key).filter(models.Key.second_user_id==user.id)
+    for key in user_keys:
+        db.delete(key)
+
+    db.delete(user)
     db.flush()
 
+@db
+def add_key(first_user, second_user, aes_key, db):
+    db_key = models.Key(first_user_id = first_user.id,
+    second_user_id = second_user.id,
+    aes_key = aes_key)
+    db.add(db_key)
+    db.flush()
+
+@db
+def get_key(first_user, second_user, db):
+    return db.query(models.Key).filter(models.Key.first_user_id==first_user.id, 
+                                       models.Key.second_user_id==second_user.id).first()
+
+@db
+def delete_token(token: models.Token, db):
+    db.delete(token)
+    db.flush()
 
 @db
 def delete_user_tokens(user, db):
@@ -125,7 +151,6 @@ def update_token_after_login(found_token, access_token: str, access_token_expira
                                 "verification_code_enter_attempts": 0, "verification_code_type": None,
                                 "logged": True})
     db.flush()
-
 
 @db
 def add_verification_code_attempt(user, db):

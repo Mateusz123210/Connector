@@ -45,21 +45,9 @@ async def login(data: OAuth2PasswordRequestForm = Depends()):
 async def confirm_login(data: BasicConfirmationWithVerificationCode = Depends(validate_user_token_for_confirmation)):
     return services.confirm_login1(data)
 
-# @app.post("/reset-password")
-# async def reset_password(data: OAuth2PasswordRequestForm = Depends()):
-#     return services.reset_password(data)
-
-# @app.post("/confirm-reset-password")
-# async def confirm_reset_password(data: BasicConfirmationWithVerificationCode = Depends(validate_user_token_for_confirmation)):
-#     return services.confirm_reset_password(data)
-
-# @app.post("/change-password")
-# async def change_password():
-#     return services.change_password()
-
-# @app.post("/confirm-change-password")
-# async def confirm_change_password(data: BasicConfirmationWithVerificationCode = Depends(validate_user_token_for_confirmation)):
-#     return services.confirm_change_password(data)
+@app.get("/get-key")
+async def get_key(data: BasicConfirmationForFetchingAES = Depends(validate_user_token_for_aes_fetch)):
+    return services.get_aes_key(data)
 
 @app.post("/delete-account")
 async def delete_account(data: BasicConfirmationForDeleteAccount = Depends(validate_user_token_for_delete_account)):
@@ -77,6 +65,21 @@ async def send_message(data: BasicConfirmationForMessageSend = Depends(validate_
 async def get_messages(data: BasicConfirmationForMessageFetch = Depends(validate_user_token_for_message_fetch)):
     return services.get_messages(data)
 
+# @app.post("/reset-password")
+# async def reset_password(data: OAuth2PasswordRequestForm = Depends()):
+#     return services.reset_password(data)
+
+# @app.post("/confirm-reset-password")
+# async def confirm_reset_password(data: BasicConfirmationWithVerificationCode = Depends(validate_user_token_for_confirmation)):
+#     return services.confirm_reset_password(data)
+
+# @app.post("/change-password")
+# async def change_password():
+#     return services.change_password()
+
+# @app.post("/confirm-change-password")
+# async def confirm_change_password(data: BasicConfirmationWithVerificationCode = Depends(validate_user_token_for_confirmation)):
+#     return services.confirm_change_password(data)
 
 
 

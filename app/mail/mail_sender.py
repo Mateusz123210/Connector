@@ -16,6 +16,7 @@ def send_email_with_verification_code_for_registration(executor: MailSenderExecu
             </div>
         </body>
     </html>"""
+    print(verification_code)
     # executor.send_email(recipient, subject, html_message)
 
 def send_email_with_verification_code_for_login(executor: MailSenderExecutor, recipient: str, verification_code: str):
@@ -35,6 +36,7 @@ def send_email_with_verification_code_for_login(executor: MailSenderExecutor, re
         </body>
     </html>
     """
+    print(verification_code)
     # executor.send_email(recipient, subject, html_message)
 
 def send_email_with_verification_code_for_password_reset(executor: MailSenderExecutor, recipient: str, verification_code: str):
@@ -54,5 +56,6 @@ def send_email_with_verification_code_for_password_reset(executor: MailSenderExe
         </body>
     </html>
     """
+    print(verification_code)
     # executor.send_email(recipient, subject, html_message)
     

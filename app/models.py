@@ -16,6 +16,17 @@ class User(Base):
     registration_confirmation_code_enter_attempts = Column(Integer, nullable=False, default=0)
 
     user_tokens = relationship("Token", back_populates="users")
+    first_user_key = relationship("Key", backref = 'first_user_key', lazy = 'dynamic', foreign_keys = 'Key.first_user_id')
+    second_user_key = relationship("Key", backref = 'second_user_key', lazy = 'dynamic', foreign_keys = 'Key.second_user_id')
+
+
+class Key(Base):
+    __tablename__ = "keys"
+
+    id = Column(Integer, primary_key=True)
+    first_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    second_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    aes_key = Column(String, nullable=False)
 
 
 class Token(Base):
@@ -35,4 +46,3 @@ class Token(Base):
     new_password = Column(String, nullable=True)
 
     users = relationship("User", back_populates="user_tokens")
-
