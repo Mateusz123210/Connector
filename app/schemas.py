@@ -1,7 +1,13 @@
 from pydantic import BaseModel
 
+class Token(BaseModel):
+    token: str
 
-class MessageSending(BaseModel):
+    class Config:
+        from_attributes = True
+
+
+class MessageSending(Token):
     first_user: str
     second_user: str
     message: str
@@ -11,7 +17,7 @@ class MessageSending(BaseModel):
         from_attributes = True
 
 
-class MessagesFetching(BaseModel):
+class MessagesFetching(Token):
     first_user: str
     second_user: str
 
@@ -20,7 +26,7 @@ class MessagesFetching(BaseModel):
         from_attributes = True
 
 
-class MessagesDeleting(BaseModel):
+class MessagesDeleting(Token):
     user: str
 
 
