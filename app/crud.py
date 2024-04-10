@@ -54,6 +54,22 @@ def create_user_tokens2(db_user: models.User, access_token: str, refresh_token: 
     return db_token
 
 @db
+def create_user_tokens3(db_user: models.User, access_token: str,
+                       access_token_expiration_time: datetime, refresh_token_expiration_time: datetime, db,
+                       verification_code: str, verification_code_expiration_time: datetime,
+                       verification_code_type: str, logged: bool, new_password : str):
+    db_token = models.Token(access_token=access_token, refresh_token=None, 
+                        access_token_expiration_time=access_token_expiration_time,
+                        refresh_token_expiration_time=None, user_id=db_user.id,
+                        verification_code=verification_code, 
+                        verification_code_expiration_time=verification_code_expiration_time,
+                        verification_code_type=verification_code_type, logged=logged,
+                        new_password=new_password)
+    db.add(db_token)
+    db.flush()
+    return db_token
+
+@db
 def delete_user(user, db):
     user_tokens = db.query(models.Token).filter(models.Token.user_id==user.id)
     for token in user_tokens:

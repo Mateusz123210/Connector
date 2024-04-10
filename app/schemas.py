@@ -18,6 +18,14 @@ class BasicAuthentication(Email):
         from_attributes = True
 
 
+class BasicConfirmationForDeleteAccount(BasicAuthentication):
+    access_token: str 
+
+
+    class Config:
+        from_attributes = True
+
+
 class BasicConfirmation(Email):
     access_token: str
 

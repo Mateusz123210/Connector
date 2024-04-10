@@ -32,6 +32,7 @@ class Token(Base):
     verification_code_enter_attempts = Column(Integer, nullable=False, default=0)
     verification_code_type = Column(String, nullable=True)
     logged = Column(Boolean, nullable=False, default=False)
+    new_password = Column(String, nullable=True)
 
     users = relationship("User", back_populates="user_tokens")
 
