@@ -64,15 +64,7 @@ const ResponsiveAppBar = (props: RegistrationAndLoginStatus) => {
             </Grid>
             <Grid item xs={3} paddingTop={1.0} >
 
-            {props.logged == false &&    <Box display="flex" justifyContent="flex-end" paddingRight={2}>
-                    <Button
-                        
-                        key="Login"
-                        onClick={() => navigate("/login")}
-                        sx={{ my: 2, fontSize: '24px', color: '#1D6989'}}
-                    >
-                        Login
-                    </Button>
+            {props.logged == false && props.blocked == false && <Box display="flex" justifyContent="flex-end" paddingRight={2}>
                     <Button
                         key="Register"
                         onClick={() => navigate("/register")}
@@ -80,7 +72,14 @@ const ResponsiveAppBar = (props: RegistrationAndLoginStatus) => {
                     >
                         Register
                     </Button>
-                    
+                    <Button
+                        
+                        key="Login"
+                        onClick={() => navigate("/login")}
+                        sx={{ my: 2, fontSize: '24px', color: '#1D6989'}}
+                    >
+                        Login
+                    </Button>           
                 </Box>
             }
 

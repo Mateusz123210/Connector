@@ -10,6 +10,7 @@ import ConfirmRegisterPage from "./pages/ConfirmRegisterPage";
 import ConfirmLoginPage from "./pages/ConfirmLoginPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ResponsiveAppBar from "./pages/ResponsiveAppBar";
+import ForbiddenPage from "./pages/ForbiddenPage";
 
 const getWindowDimensions = () => {
   const { innerWidth: width, innerHeight: height } = window;
@@ -38,6 +39,15 @@ const useWindowDimensions = () => {
 
 const theme = createTheme(
   {
+    components: {
+      MuiFormHelperText: {
+        styleOverrides: {
+          root: {
+            color: "red",
+          },
+        },
+      },
+    },
     typography: {
       fontFamily: "Source Sans Pro, sans-serif",
       fontSize: 13,
@@ -50,7 +60,7 @@ const theme = createTheme(
     },
     palette: {
       primary: {
-        main: "#ca2f2f",
+        main: "#2F84CA",
         contrastText: "#000",
       },
       secondary: {
@@ -70,13 +80,13 @@ const theme = createTheme(
 );
 
 export interface RegistrationAndLoginStatus {
-  registered: boolean,
+  blocked: boolean,
   logged: boolean
 }
 
 const App = () => {
   const [regAndLogStatus, setRegAndLogStatus] = React.useState<RegistrationAndLoginStatus>({
-    registered: false,
+    blocked: false,
     logged: false
   })
   let a = useWindowDimensions();
@@ -89,14 +99,15 @@ const App = () => {
               // justifyContent="center"
               justifyContent="center"
             >
-              <ResponsiveAppBar logged={regAndLogStatus.logged} registered={regAndLogStatus.registered}  />
+              <ResponsiveAppBar logged={regAndLogStatus.logged} blocked={regAndLogStatus.blocked}  />
               <Routes>
-                      <Route path="/" element={<MainPage />} />
-                      <Route path="/register" element={<RegisterPage />} />
+                      <Route path="/" element={<MainPage setRegAndLogStatus={setRegAndLogStatus} />} />
+                      <Route path="/register" element={<RegisterPage setRegAndLogStatus={setRegAndLogStatus} />} />
                       <Route path="/confirm-registration" element={<ConfirmRegisterPage />} />
                       <Route path="/login" element={<LoginPage />} />
                       <Route path="/confirm-login" element={<ConfirmLoginPage />} />
-                      <Route path="/massages" element={<MessagePage />} />
+                      <Route path="/messages" element={<MessagePage />} />
+                      <Route path="/forbidden" element={<ForbiddenPage />} />
                       <Route path="/*" element={<NotFoundPage />} />
                       
               </Routes>
