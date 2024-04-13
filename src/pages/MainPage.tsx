@@ -1,3 +1,4 @@
+import { Grid, Typography } from "@mui/material"
 
 
 
@@ -8,7 +9,12 @@ const MainPage = () => {
 
 
     return(
-        <h1>Elo</h1>
+        
+        <Grid item width={"50%"}  marginTop={15} >
+            <Typography variant="h1" textAlign={"center"}>
+                Welcome. To start, login or create account!
+            </Typography>
+        </Grid>
     )
 
 
