@@ -12,10 +12,8 @@ import { RegistrationAndLoginStatus } from '../App';
 
 const settings = ['Change password', 'Logout'];
 
-const ResponsiveAppBar = (props: RegistrationAndLoginStatus) => {
+const ResponsiveAppBar = (props: any) => {
     
-    
-
     const navigate = useNavigate();
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
@@ -35,9 +33,13 @@ const ResponsiveAppBar = (props: RegistrationAndLoginStatus) => {
         setAnchorElUser(null);
     };
 
-    return (
+    const handleLogout = () => {
+        const result = props.logout()
+        if(result === true) 
+            navigate("/")
+    }
 
-        // <AppBar >
+    return (
         <Grid container height={110} padding={0.6}  style={{ color: 'white', backgroundColor: '#CBE2EF' }}>
         
             
@@ -105,11 +107,14 @@ const ResponsiveAppBar = (props: RegistrationAndLoginStatus) => {
                     open={Boolean(anchorElUser)}
                     onClose={handleCloseUserMenu}
                     >
-                    {settings.map((setting) => (
-                        <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                        <Typography textAlign="center">{setting}</Typography>
-                        </MenuItem>
-                    ))}
+                    {/* <MenuItem key="Change password" onClick={handleCloseUserMenu}>
+                        <Typography textAlign="center">Change password</Typography>
+                    </MenuItem> */}
+
+                    <MenuItem key="Logout" onClick={handleLogout}>
+                        <Typography textAlign="center">Logout</Typography>
+                    </MenuItem>
+
                     </Menu>
                 </Box>
             }
