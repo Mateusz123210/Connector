@@ -27,6 +27,7 @@ export interface ConfirmLoginResponse{
     refresh_token: string
 }
 
+
 export interface Logout{
     email: string,
     access_token: string,
