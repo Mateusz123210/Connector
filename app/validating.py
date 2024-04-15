@@ -2,8 +2,8 @@ import re
 
 class Validator():
     def __init__(self):
-        self.email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
-        self.special_sym =['$', '@', '#', '%']
+        self.email_regex = r'^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
+        # self.special_sym =['!','@','#','$','%','^','&','*','(',')','_','+','\\',''-=\[\]{};':"\\|,.<>\/?]+]
 
     def validate_email(self, email: str):
         if(re.fullmatch(self.email_regex, email)):
@@ -25,7 +25,8 @@ class Validator():
         if not any(char.islower() for char in password):
             return False
             
-        if not any(char in self.special_sym for char in password):
+        regexp = re.compile(r"""[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+""")
+        if not regexp.search(password):
             return False
         
         return True

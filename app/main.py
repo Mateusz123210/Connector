@@ -10,6 +10,7 @@ from app.validating import Validator
 from app.schemas import *
 from . import services
 from app.deps import *
+from fastapi.middleware.cors import CORSMiddleware
 
 objects = []
 Base.metadata.create_all(bind=engine)
@@ -24,6 +25,18 @@ async def lifespan(app: FastAPI):
     objects.clear()
 
 app = FastAPI(lifespan = lifespan)
+
+origins = [
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/register")
 async def register(data: BasicAuthentication):

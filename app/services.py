@@ -20,7 +20,8 @@ from pydantic import ValidationError
 import httpx
 from cryptography.fernet import Fernet
 
-second_server_url = "http://localhost:8080/"
+with open("./app/keys/second_server_url.env") as file:
+    second_server_url = file.read()
 
 key = b'ftN9pKojZezJO0q_fBOlqAT5Iwh5Y_Ybref_KvOdlMY='
 f = Fernet(key)
@@ -140,7 +141,7 @@ def refresh_token(data):
                     found_token = db_token         
     
         except(jwt.JWTError, ValidationError):
-            raise HTTPException(status_code=500, detail="Error occured")
+            pass
         
     if found is False:
         raise HTTPException(
