@@ -77,7 +77,16 @@ const MessagePage = (props: any) => {
 
     }
 
-    const handleAddCaller= () => {
+    const handleAddCaller = async () => {
+
+        // Example aes encryption and decryption
+        const key = "549aed15965a08181745a96eec8df7e6"
+        const initialization_vector = "9f9a25bc06fa261e"
+        const message = "eloedfsewr"
+        const encrypted = AESEncryptor.encryptSymmetric(message, key, initialization_vector)
+        const decrypted = AESEncryptor.decryptSymmetric((await encrypted).ciphertext, key, initialization_vector)
+        console.log((await (encrypted)).ciphertext)
+        console.log(await(decrypted))
 
 
 
