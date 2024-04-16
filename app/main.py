@@ -34,7 +34,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["POST", "GET", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -58,7 +58,7 @@ async def login(data: OAuth2PasswordRequestForm = Depends()):
 async def confirm_login(data: BasicConfirmationWithVerificationCode = Depends(validate_user_token_for_confirmation)):
     return services.confirm_login1(data)
 
-@app.get("/get-key")
+@app.post("/get-key")
 async def get_key(data: BasicConfirmationForFetchingAES = Depends(validate_user_token_for_aes_fetch)):
     return services.get_aes_key(data)
 
@@ -74,9 +74,13 @@ async def logout(data: BasicConfirmation = Depends(validate_user_token)):
 async def send_message(data: BasicConfirmationForMessageSend = Depends(validate_user_token_for_message_send)):
     return services.send_message(data)
 
-@app.get("/get-messages")
+@app.post("/get-messages")
 async def get_messages(data: BasicConfirmationForMessageFetch = Depends(validate_user_token_for_message_fetch)):
     return services.get_messages(data)
+
+@app.post("/get-available-callers")
+async def get_available_callers(data: BasicConfirmation = Depends(validate_user_token_for_available_callers_fetch)):
+    return services.get_available_callers(data)
 
 # @app.post("/reset-password")
 # async def reset_password(data: OAuth2PasswordRequestForm = Depends()):

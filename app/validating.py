@@ -3,7 +3,6 @@ import re
 class Validator():
     def __init__(self):
         self.email_regex = r'^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$'
-        # self.special_sym =['!','@','#','$','%','^','&','*','(',')','_','+','\\',''-=\[\]{};':"\\|,.<>\/?]+]
 
     def validate_email(self, email: str):
         if(re.fullmatch(self.email_regex, email)):

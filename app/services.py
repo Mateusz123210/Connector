@@ -38,6 +38,8 @@ def register(data: BasicAuthentication):
     
     db_user = crud.get_user_by_email(email=data.email)
     if db_user:
+        if db_user.is_active is True:
+            raise HTTPException(status_code=400, detail="In system there is currently registered this user!")
         utc=pytz.UTC
         datetime_now = datetime.now(UTC)
         confirmation_code_expiration_time = utc.localize(db_user.registration_confirmation_code_expiration_time)
@@ -607,6 +609,21 @@ def get_aes_key(data):
             key = aes_generator.get_random_key()
             crud.add_key(user, receiver, key)
             return {"key": key}
+        
+@transactional
+def get_available_callers(data):
+    db_user = crud.get_user_by_email(email=data.email)
+    if db_user is None:
+        raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User does not exist")
+    fetched1 = crud.get_available_callers1(db_user.id)
+    fetched2 = crud.get_available_callers2(db_user.id)
+    callers1 = [crud.get_user(x.first_user_id).email for x in fetched1]
+    callers2 = [crud.get_user(x.second_user_id).email for x in fetched2]
+    callers = callers1 + callers2
+
+    return {"message": "callers fetched", "callers": callers}
 
 # @transactional
 # def reset_password(data: OAuth2PasswordRequestForm = Depends()):
