@@ -1,9 +1,10 @@
 import { Button, Grid, List, ListItem, ListItemButton, ListItemIcon, ListItemText, TextField, TextareaAutosize, Typography} from "@mui/material"
 import { useEffect, useState } from "react"
-import { Caller, FetchMessage, SendMessage } from "../services/messageService"
+import { Caller, FetchMessage, Key, SendMessage } from "../services/messageService"
 
 import MessageService from "../services/messageService"
 import RefreshTokenService, { RefreshToken } from "../services/refreshTokenService"
+import AESEncryptor from "../aes/AESEncryptor"
 
 
 
@@ -15,8 +16,6 @@ const MessagePage = (props: any) => {
 
     useEffect(() => {
         handleGetAvailableCallers()
-        // handleMessageFetch()
-
 
     }, [])
 
@@ -28,7 +27,9 @@ const MessagePage = (props: any) => {
 
     const [messages, setMessages] = useState<[]>([])
     const [receiver, setReceiver] = useState<string>("")
+    const [currentReceiver, setCurrentReceiver] = useState<string>("")
     const [receivers, setReceivers] = useState<[]>([])
+    const [aesKeys, setAesKeys] = useState<Map<string, string>>(new Map<string, string>) 
     const [helperText, setHelperText] = useState<string>("")
     const [addUserHelperText, setAddUserHelperText] = useState<string>("")
     const [messageForm, setMessageForm] = useState<string>("Siema")
@@ -45,12 +46,10 @@ const MessagePage = (props: any) => {
             email: props.email,
             refresh_token: props.tokens.refresh_token,
           }
-          console.log("D")
         MessageService.getAvailableCallers(values).then((response) => {
-            console.log("E")
+
             const data = response.data
             setReceivers(data.callers)
-            console.log("C")
           })
           .catch((error) => {
             
@@ -61,10 +60,7 @@ const MessagePage = (props: any) => {
               MessageService.getAvailableCallers(values).then((response) => {
                 const data = response.data
                 setReceivers(data.callers)
-                console.log("C")
-                // setMyTokens("", "")
-                // setMyEmail("")
-                // hideMenuOnAppBar()
+                props.setMyTokens(data.access_token, data.refresh_token)    
       
               })
               .catch((error) => {
@@ -82,8 +78,29 @@ const MessagePage = (props: any) => {
     }
 
     const handleAddCaller= () => {
-        const caller = receiver
 
+
+
+
+
+
+        // const caller = receiver
+        // const res = handleGetAesKey(caller)
+        // console.log("result")
+        // console.log(res)
+        // if(res === true){
+        //     setAddUserHelperText("You cannot add this user")
+        //     return
+        // }else{
+        //     setAddUserHelperText("")
+        // }
+        // if(caller in receivers){
+        //     setAddUserHelperText("This user is already added")
+        //     return
+        // }
+        // const allReceivers = receivers
+        // console.log(typeof allReceivers)
+        // // setReceivers({...receivers, ...caller})
 
 
 
@@ -96,11 +113,15 @@ const MessagePage = (props: any) => {
     
 
     const handleMessageSend = () => {
+        if(! (aesKeys.has(currentReceiver))){
+            handleGetAesKey(currentReceiver)
+        }
+
         const values: SendMessage = {
             email: props.email,
             access_token: props.tokens.access_token,
             message: messageForm,
-            receiver: receiver
+            receiver: currentReceiver
         }
 
         const refreshTokenValues: RefreshToken = {
@@ -138,11 +159,11 @@ const MessagePage = (props: any) => {
 
     }
 
-    const handleMessageFetch = () => {
+    const handleMessageFetch = (rec: string) => {
         const values: FetchMessage = {
             email: props.email,
             access_token: props.tokens.access_token,
-            caller: receiver
+            caller: rec
         }
 
         const refreshTokenValues: RefreshToken = {
@@ -150,10 +171,14 @@ const MessagePage = (props: any) => {
             refresh_token: props.tokens.refresh_token,
           }
         
-          console.log("values")
-          console.log(values)
         MessageService.getMessage(values).then((response) => {
-            console.log("message got")
+            const data = response.data
+            const messages = data.messages
+            
+
+
+            console.log(data)  
+
           })
           .catch((error) => {
             
@@ -164,10 +189,8 @@ const MessagePage = (props: any) => {
               MessageService.getMessage(values).then((response) => {
                 const data = response.data
                 console.log(data)
-                // console.log("C")
-                // setMyTokens("", "")
-                // setMyEmail("")
-                // hideMenuOnAppBar()
+
+                props.setMyTokens(data.access_token, data.refresh_token)
       
               })
               .catch((error) => {
@@ -183,9 +206,60 @@ const MessagePage = (props: any) => {
 
     }
 
+    const handleGetAesKey = (caller: string) => {
+        let fetched = false
+        const values: Key = {
+            email: props.email,
+            access_token: props.tokens.access_token,
+            receiver: caller
+        }
+
+        const refreshTokenValues: RefreshToken = {
+            email: props.email,
+            refresh_token: props.tokens.refresh_token,
+          }
+        MessageService.getKey(values).then((response) => {
+            const data = response.data
+            const keys = aesKeys
+            keys.set(caller, data.key)
+            setAesKeys(keys)
+            console.log("true")
+            fetched = true
+          })
+          .catch((error) => {
+            
+            RefreshTokenService.getNewToken(refreshTokenValues).then((response) => {
+              const data = response.data
+              values.access_token = data.access_token
+      
+              MessageService.getKey(values).then((response) => {
+                const data = response.data
+                const keys = aesKeys
+                keys.set(caller, data.key)
+                setAesKeys(keys)
+                props.setMyTokens(data.access_token, data.refresh_token)
+                console.log("true")
+                fetched = true
+              })
+              .catch((error) => {
+              })
+            })
+            .catch((error) => {
+            })
+        })
+
+        return fetched
+    }
+
+
     const handleChangeReceiver = (rec: string) => {
-        console.log(rec)
-        console.log("receiver changed")
+        setCurrentReceiver(rec)
+        if(! (aesKeys.has(rec))){
+            handleGetAesKey(rec)
+        }
+        handleMessageFetch(rec)
+
+
 
 
     }
@@ -205,9 +279,9 @@ const MessagePage = (props: any) => {
                 >
                 {receivers.map((rec) => (
                     <ListItem disablePadding>
-                        <ListItemButton key={rec} onClick={() => {                            
+                        <ListItemButton key={rec} onClick={                 
                             handleChangeReceiver.bind(this, rec)                            
-                            } } sx={{background: "#cccccc"}}>
+                        } sx={{background: rec == currentReceiver? "#cccccc": "#97CFFC" }}>
                             <ListItemText   primary= {rec} />
                         </ListItemButton>
                     </ListItem>
@@ -225,7 +299,7 @@ const MessagePage = (props: any) => {
                     >
                 </TextField>
                 <Button  style={{background: '#214757', fontSize: 28, width:"100%", marginTop: "8px"}}
-                        onClick={handleMessageSend}>
+                        onClick={handleAddCaller}>
                         Add person
                 </Button>
             </Grid>
