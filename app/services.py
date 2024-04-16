@@ -600,15 +600,18 @@ def get_aes_key(data):
     
     found_aes_key = crud.get_key(user, receiver)
     if found_aes_key:
-        return {"key": found_aes_key.aes_key}
+        return {"key": found_aes_key.aes_key,
+                "initialization_vector": found_aes_key.initialization_vector}
     else:
         found_aes_key = crud.get_key(receiver, user)
         if found_aes_key:
-            return {"key": found_aes_key.aes_key}
+            return {"key": found_aes_key.aes_key,
+                "initialization_vector": found_aes_key.initialization_vector}
         else:
             key = aes_generator.get_random_key()
-            crud.add_key(user, receiver, key)
-            return {"key": key}
+            initialization_vector = aes_generator.get_random_initialization_vector()
+            crud.add_key(user, receiver, key, initialization_vector)
+            return {"key": key, "initialization_vector": initialization_vector}
         
 @transactional
 def get_available_callers(data):

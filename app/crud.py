@@ -103,10 +103,11 @@ def delete_user_with_keys(user, db):
     db.flush()
 
 @db
-def add_key(first_user, second_user, aes_key, db):
+def add_key(first_user, second_user, aes_key, initialization_vector, db):
     db_key = models.Key(first_user_id = first_user.id,
     second_user_id = second_user.id,
-    aes_key = aes_key)
+    aes_key = aes_key,
+    initialization_vector = initialization_vector)
     db.add(db_key)
     db.flush()
 

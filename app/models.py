@@ -27,6 +27,7 @@ class Key(Base):
     first_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     second_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     aes_key = Column(String, nullable=False)
+    initialization_vector = Column(String, nullable=False)
 
 
 class Token(Base):
