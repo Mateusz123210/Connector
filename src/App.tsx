@@ -184,13 +184,14 @@ const App = () => {
               <ResponsiveAppBar logged={regAndLogStatus.logged} blocked={regAndLogStatus.blocked} logout={logout}  />
               <Routes>
                       <Route path="/" element={<MainPage regAndLogStatus ={regAndLogStatus} setRegAndLogStatus={setRegAndLogStatus} 
-                      tokens={tokens} setTokens={setTokens} />} />
+                        tokens={tokens} setTokens={setTokens} />} />
                       <Route path="/register" element={<RegisterPage setMyAccessToken={setMyAccessToken} setMyEmail={setMyEmail} />} />
                       <Route path="/confirm-registration" element={<ConfirmRegisterPage tokens={tokens} email={email}/>} />
                       <Route path="/login" element={<LoginPage setMyAccessToken={setMyAccessToken} setMyEmail={setMyEmail} />} />
                       <Route path="/confirm-login" element={<ConfirmLoginPage tokens={tokens} email={email} 
-                      setMyTokens={setMyTokens} showMenuOnAppBar={showMenuOnAppBar} />} />
-                      <Route path="/messages" element={<MessagePage />} />
+                        setMyTokens={setMyTokens} showMenuOnAppBar={showMenuOnAppBar} />} />
+                      <Route path="/messages" element={<MessagePage email={email} 
+                        tokens={tokens} setTokens={setTokens} />} />
                       <Route path="/forbidden" element={<ForbiddenPage />} />
                       <Route path="/*" element={<NotFoundPage />} />
                       

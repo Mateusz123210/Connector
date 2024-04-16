@@ -22,6 +22,11 @@ export interface Key{
     receiver: string
 }
 
+export interface Caller{
+    email: string,
+    access_token: string
+}
+
 
 class MessageService{
     private apiUrl: string = api.getApi()
@@ -31,11 +36,15 @@ class MessageService{
     }
 
     getMessage(fetchMessage: FetchMessage){
-        return axios.post(`${this.apiUrl}/fetch-message`, fetchMessage)
+        return axios.post(`${this.apiUrl}/get-messages`, fetchMessage)
     }
 
     getKey(key: Key){
         return axios.post(`${this.apiUrl}/get-key`, key)
     }
+
+    getAvailableCallers(caller: Caller){
+        return axios.post(`${this.apiUrl}/get-available-callers`, caller)
+    }
 }   
-export default new MessageService
+export default new MessageService()
