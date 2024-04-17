@@ -5,6 +5,7 @@ import { Caller, FetchMessage, Key, SendMessage } from "../services/messageServi
 import MessageService from "../services/messageService"
 import RefreshTokenService, { RefreshToken } from "../services/refreshTokenService"
 import AESEncryptor from "../aes/AESEncryptor"
+import Validator from "../validators/Validator"
 
 
 
@@ -15,8 +16,13 @@ import AESEncryptor from "../aes/AESEncryptor"
 const MessagePage = (props: any) => {
 
     useEffect(() => {
+        setMessageForm("")
+        setMessagesShown("")
+        setHelperText("")
+        setAddUserHelperText("")
+        setCurrentReceiver("")
+        // setMessages([])
         handleGetAvailableCallers()
-
     }, [])
 
     const getAllMessages = () => {
@@ -25,10 +31,10 @@ const MessagePage = (props: any) => {
 
     }
 
-    const [messages, setMessages] = useState<[]>([])
+    const [messages, setMessages] = useState<string[]>([])
     const [receiver, setReceiver] = useState<string>("")
     const [currentReceiver, setCurrentReceiver] = useState<string>("")
-    const [receivers, setReceivers] = useState<[]>([])
+    const [receivers, setReceivers] = useState<any[]>([])
     const [aesKeys, setAesKeys] = useState<Map<string, string>>(new Map<string, string>) 
     const [helperText, setHelperText] = useState<string>("")
     const [addUserHelperText, setAddUserHelperText] = useState<string>("")
@@ -36,7 +42,7 @@ const MessagePage = (props: any) => {
     const [messagesShown, setMessagesShown] = useState<string>("")
 
 
-    const handleGetAvailableCallers = () => {
+    const handleGetAvailableCallers = async () => {
         const values: Caller = {
             email: props.email,
             access_token: props.tokens.access_token,
@@ -46,7 +52,7 @@ const MessagePage = (props: any) => {
             email: props.email,
             refresh_token: props.tokens.refresh_token,
           }
-        MessageService.getAvailableCallers(values).then((response) => {
+        var unneccessary_variable = await MessageService.getAvailableCallers(values).then((response) => {
 
             const data = response.data
             setReceivers(data.callers)
@@ -54,13 +60,13 @@ const MessagePage = (props: any) => {
           .catch((error) => {
             
             RefreshTokenService.getNewToken(refreshTokenValues).then((response) => {
-              const data = response.data
-              values.access_token = data.access_token
+              const refresh_token_data = response.data
+              values.access_token = refresh_token_data.access_token
       
               MessageService.getAvailableCallers(values).then((response) => {
                 const data = response.data
                 setReceivers(data.callers)
-                props.setMyTokens(data.access_token, data.refresh_token)    
+                props.setMyTokens(refresh_token_data.access_token, refresh_token_data.refresh_token)    
       
               })
               .catch((error) => {
@@ -71,59 +77,108 @@ const MessagePage = (props: any) => {
         
             })
         })
-
-
-
-
+        var unnecessary_variable2 = await unneccessary_variable
     }
 
     const handleAddCaller = async () => {
 
         // Example aes encryption and decryption
-        const key = "549aed15965a08181745a96eec8df7e6"
-        const initialization_vector = "9f9a25bc06fa261e"
-        const message = "eloedfsewr"
-        const encrypted = AESEncryptor.encryptSymmetric(message, key, initialization_vector)
-        const decrypted = AESEncryptor.decryptSymmetric((await encrypted).ciphertext, key, initialization_vector)
-        console.log((await (encrypted)).ciphertext)
-        console.log(await(decrypted))
+        // const key = "549aed15965a08181745a96eec8df7e6"
+        // const initialization_vector = "9f9a25bc06fa261e"
+        // const message = "eloedfsewr"
+        // const encrypted = AESEncryptor.encryptSymmetric(message, key, initialization_vector)
+        // const decrypted = AESEncryptor.decryptSymmetric((await encrypted).ciphertext, key, initialization_vector)
+        // console.log((await (encrypted)).ciphertext)
+        // console.log(await(decrypted))
 
 
 
 
 
 
-        // const caller = receiver
-        // const res = handleGetAesKey(caller)
-        // console.log("result")
-        // console.log(res)
-        // if(res === true){
-        //     setAddUserHelperText("You cannot add this user")
-        //     return
-        // }else{
-        //     setAddUserHelperText("")
-        // }
-        // if(caller in receivers){
-        //     setAddUserHelperText("This user is already added")
-        //     return
-        // }
-        // const allReceivers = receivers
-        // console.log(typeof allReceivers)
-        // // setReceivers({...receivers, ...caller})
+        const caller = receiver
+        if(!Validator.validateEmail(caller)){
+            setAddUserHelperText("Invalid email")
+            return
+        }
+        for(let i = 0; i < receivers.length; i++){
+            if(receivers[i] == caller){
+                setAddUserHelperText("This user is already added")
+                return
+            }
+        }
+        const res = await handleGetAesKey(caller)
+        if(res === false){
+            setAddUserHelperText("You cannot add this user")
+            return
+        }else{
+            setAddUserHelperText("")
+        }
+        var allReceivers = receivers
+        allReceivers.push(String(caller))
+        setReceivers(allReceivers)
+        setReceiver("")
+        setCurrentReceiver(caller)
+        setMessageForm("")
+        handleMessageFetch(caller)
 
+    }
 
+    const handleGetAesKey = async (caller: string): Promise<boolean> => {
+        var fetched = false
+        const values: Key = {
+            email: props.email,
+            access_token: props.tokens.access_token,
+            receiver: caller
+        }
 
-        
+        const refreshTokenValues: RefreshToken = {
+            email: props.email,
+            refresh_token: props.tokens.refresh_token,
+          }
+        const unnecessary_variable = MessageService.getKey(values).then((response) => {
+            const data = response.data
+            const keys = aesKeys
+            keys.set(caller, data.key)
+            setAesKeys(keys)
+            fetched = true
+          })
+          .catch((error) => {
+            
+            RefreshTokenService.getNewToken(refreshTokenValues).then((response) => {
+              const refresh_token_data = response.data
+              values.access_token = refresh_token_data.access_token
+      
+              MessageService.getKey(values).then((response) => {
+                const data = response.data
+                const keys = aesKeys
+                keys.set(caller, data.key)
+                setAesKeys(keys)
+                props.setMyTokens(refresh_token_data.access_token, refresh_token_data.refresh_token)
+                fetched = true
+              })
+              .catch((error) => {
+              })
+            })
+            .catch((error) => {
+            })
+        })
 
+        const unnecessary_variable2 = await unnecessary_variable
 
-
-
+        return fetched
     }
     
 
     const handleMessageSend = () => {
+
         if(! (aesKeys.has(currentReceiver))){
             handleGetAesKey(currentReceiver)
+            if(! handleGetAesKey(currentReceiver)){
+                setHelperText("Error in sending message")
+            }else{
+                setMessageForm("")
+            }
         }
 
         const values: SendMessage = {
@@ -144,16 +199,13 @@ const MessagePage = (props: any) => {
           .catch((error) => {
             
             RefreshTokenService.getNewToken(refreshTokenValues).then((response) => {
-              const data = response.data
-              values.access_token = data.access_token
+              const refresh_token_data = response.data
+              values.access_token = refresh_token_data.access_token
       
               MessageService.sendMessage(values).then((response) => {
                 const data = response.data
                 console.log(data)
-                // console.log("C")
-                // setMyTokens("", "")
-                // setMyEmail("")
-                // hideMenuOnAppBar()
+                props.setMyTokens(refresh_token_data.access_token, refresh_token_data.refresh_token)
       
               })
               .catch((error) => {
@@ -165,10 +217,10 @@ const MessagePage = (props: any) => {
             })
         })
 
-
+        handleMessageFetch(currentReceiver)
     }
 
-    const handleMessageFetch = (rec: string) => {
+    const handleMessageFetch = async (rec: string) => {
         const values: FetchMessage = {
             email: props.email,
             access_token: props.tokens.access_token,
@@ -180,95 +232,78 @@ const MessagePage = (props: any) => {
             refresh_token: props.tokens.refresh_token,
           }
         
-        MessageService.getMessage(values).then((response) => {
+        MessageService.getMessage(values).then(async (response) => {
             const data = response.data
-            const messages = data.messages
-            
+            var messages1 = await data.messages
+            setMessages(messages1.map((first: any) => ({first})))
 
 
             console.log(data)  
+            return messages1
 
           })
           .catch((error) => {
             
-            RefreshTokenService.getNewToken(refreshTokenValues).then((response) => {
-              const data = response.data
-              values.access_token = data.access_token
+            RefreshTokenService.getNewToken(refreshTokenValues).then(async (response) => {
+              const refresh_token_data = (await response).data
+              values.access_token = refresh_token_data.access_token
       
-              MessageService.getMessage(values).then((response) => {
+              MessageService.getMessage(values).then(async (response) => {
                 const data = response.data
+                var messages1 = await data.messages
+                setMessages(messages1.map((first: any) => ({first})))
                 console.log(data)
-
-                props.setMyTokens(data.access_token, data.refresh_token)
+                props.setMyTokens(refresh_token_data.access_token, refresh_token_data.refresh_token)
+                return messages1
       
               })
               .catch((error) => {
-          
+                return null
               })
             })
             .catch((error) => {
-        
+                return null
             })
         })
-
-
-
     }
 
-    const handleGetAesKey = (caller: string) => {
-        let fetched = false
-        const values: Key = {
-            email: props.email,
-            access_token: props.tokens.access_token,
-            receiver: caller
-        }
-
-        const refreshTokenValues: RefreshToken = {
-            email: props.email,
-            refresh_token: props.tokens.refresh_token,
-          }
-        MessageService.getKey(values).then((response) => {
-            const data = response.data
-            const keys = aesKeys
-            keys.set(caller, data.key)
-            setAesKeys(keys)
-            console.log("true")
-            fetched = true
-          })
-          .catch((error) => {
-            
-            RefreshTokenService.getNewToken(refreshTokenValues).then((response) => {
-              const data = response.data
-              values.access_token = data.access_token
-      
-              MessageService.getKey(values).then((response) => {
-                const data = response.data
-                const keys = aesKeys
-                keys.set(caller, data.key)
-                setAesKeys(keys)
-                props.setMyTokens(data.access_token, data.refresh_token)
-                console.log("true")
-                fetched = true
-              })
-              .catch((error) => {
-              })
-            })
-            .catch((error) => {
-            })
-        })
-
-        return fetched
-    }
-
-
-    const handleChangeReceiver = (rec: string) => {
+    // do poprawy warunki
+    const handleChangeReceiver = async (rec: string) => { 
         setCurrentReceiver(rec)
+        setMessageForm("")
         if(! (aesKeys.has(rec))){
-            handleGetAesKey(rec)
+            if(await handleGetAesKey(rec) === false){
+                setHelperText("Cannot fetch messages!")
+                console.log("Aes fetch error")
+            }
+            else{
+                setHelperText("")
+            }                
         }
-        handleMessageFetch(rec)
+        // const message_fetch_result = await handleMessageFetch(rec)
+        // console.log(message_fetch_result)
+        // if(message_fetch_result === null){
+        //     setHelperText("Cannot fetch messages!")
+        //     setMessagesShown("")
+        //     console.log("Message fetch error")
+        // }
+        // else{
+        //     setHelperText("")
+        //     convertMessagesAndShow(message_fetch_result)
+        // }
+    }
 
-
+    const convertMessagesAndShow = (all_messages: any) => {
+        console.log("convert")
+        var newMessages = ""
+        console.log("All messages")
+        console.log(all_messages)
+        // for (let i = 0; i < all_messages.length; i++) {
+        //     console.log(all_messages[i])
+        //     // let obj = JSON.parse(all_messages[i])
+        //     // console.log(obj)
+        //     // console.log(typeof obj)
+        // }
 
 
     }
@@ -287,11 +322,11 @@ const MessagePage = (props: any) => {
                     aria-label="contacts"
                 >
                 {receivers.map((rec) => (
-                    <ListItem disablePadding>
+                    <ListItem key={rec} disablePadding>
                         <ListItemButton key={rec} onClick={                 
                             handleChangeReceiver.bind(this, rec)                            
                         } sx={{background: rec == currentReceiver? "#cccccc": "#97CFFC" }}>
-                            <ListItemText   primary= {rec} />
+                            <ListItemText key={rec}   primary= {rec} />
                         </ListItemButton>
                     </ListItem>
                 ))}

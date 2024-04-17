@@ -31,20 +31,20 @@ export interface Caller{
 class MessageService{
     private apiUrl: string = api.getApi()
 
-    sendMessage(sendMessage: SendMessage){
-        return axios.post(`${this.apiUrl}/send-message`, sendMessage)
+    async sendMessage(sendMessage: SendMessage){
+        return await axios.post(`${this.apiUrl}/send-message`, sendMessage)
     }
 
-    getMessage(fetchMessage: FetchMessage){
-        return axios.post(`${this.apiUrl}/get-messages`, fetchMessage)
+    async getMessage(fetchMessage: FetchMessage){
+        return await axios.post(`${this.apiUrl}/get-messages`, fetchMessage)
     }
 
-    getKey(key: Key){
-        return axios.post(`${this.apiUrl}/get-key`, key)
+    async getKey(key: Key){
+        return await axios.post(`${this.apiUrl}/get-key`, key)
     }
 
-    getAvailableCallers(caller: Caller){
-        return axios.post(`${this.apiUrl}/get-available-callers`, caller)
+    async getAvailableCallers(caller: Caller){
+        return await axios.post(`${this.apiUrl}/get-available-callers`, caller)
     }
 }   
 export default new MessageService()
