@@ -36,6 +36,7 @@ const MessagePage = (props: any) => {
     const [currentReceiver, setCurrentReceiver] = useState<string>("")
     const [receivers, setReceivers] = useState<any[]>([])
     const [aesKeys, setAesKeys] = useState<Map<string, string>>(new Map<string, string>) 
+    const [initializationVectors, setInitializationVectors] = useState<Map<string, string>>(new Map<string, string>) 
     const [helperText, setHelperText] = useState<string>("")
     const [addUserHelperText, setAddUserHelperText] = useState<string>("")
     const [messageForm, setMessageForm] = useState<string>("Siema")
@@ -120,7 +121,15 @@ const MessagePage = (props: any) => {
         setReceiver("")
         setCurrentReceiver(caller)
         setMessageForm("")
-        handleMessageFetch(caller)
+        const messagesFetched = await handleMessageFetch(caller)
+        console.log("messagetcheesFd")
+        console.log(messagesFetched)
+        if(messagesFetched !== null){
+            convertMessagesAndShow(messagesFetched, receiver)
+        }else{
+            setMessagesShown("")
+            setHelperText("Cannot fetch messages")
+        }
 
     }
 
@@ -141,6 +150,9 @@ const MessagePage = (props: any) => {
             const keys = aesKeys
             keys.set(caller, data.key)
             setAesKeys(keys)
+            const init_vectors = initializationVectors
+            init_vectors.set(caller, data.initialization_vector)
+            setInitializationVectors(init_vectors)
             fetched = true
           })
           .catch((error) => {
@@ -154,6 +166,9 @@ const MessagePage = (props: any) => {
                 const keys = aesKeys
                 keys.set(caller, data.key)
                 setAesKeys(keys)
+                const init_vectors = initializationVectors
+                init_vectors.set(caller, data.initialization_vector)
+                setInitializationVectors(init_vectors)
                 props.setMyTokens(refresh_token_data.access_token, refresh_token_data.refresh_token)
                 fetched = true
               })
@@ -170,21 +185,39 @@ const MessagePage = (props: any) => {
     }
     
 
-    const handleMessageSend = () => {
+    const handleMessageSend = async () => {
+        if(currentReceiver.length === 0){
+            setHelperText("Choose receiver first")
+                console.log(setHelperText("Choose receiver first"))
+                return
+        }
+        if(messageForm.length === 0){
+            setHelperText("You cannot send empty message")
+                console.log(setHelperText("You cannot send empty message"))
+                return
+        }
 
         if(! (aesKeys.has(currentReceiver))){
             handleGetAesKey(currentReceiver)
             if(! handleGetAesKey(currentReceiver)){
                 setHelperText("Error in sending message")
+                console.log(setHelperText("Error in sending message"))
+                return
             }else{
                 setMessageForm("")
             }
         }
+        const key = aesKeys.get(currentReceiver)
+        const initializationVector = initializationVectors.get(currentReceiver)
+        const encrypted = (await (AESEncryptor.encryptSymmetric(messageForm, key as string, initializationVector as string))).ciphertext
+
+        // var hashedMessage = 
+
 
         const values: SendMessage = {
             email: props.email,
             access_token: props.tokens.access_token,
-            message: messageForm,
+            message: encrypted,
             receiver: currentReceiver
         }
 
@@ -217,10 +250,19 @@ const MessagePage = (props: any) => {
             })
         })
 
-        handleMessageFetch(currentReceiver)
+        const messagesFetched = await handleMessageFetch(currentReceiver)
+        console.log("messagetcheesFd")
+        console.log(messagesFetched)
+        if(messagesFetched !== null){
+            convertMessagesAndShow(messagesFetched, currentReceiver)
+        }else{
+            setMessagesShown("")
+            setHelperText("Cannot fetch messages")
+        }
     }
 
     const handleMessageFetch = async (rec: string) => {
+        var messages_fetched = null
         const values: FetchMessage = {
             email: props.email,
             access_token: props.tokens.access_token,
@@ -232,14 +274,12 @@ const MessagePage = (props: any) => {
             refresh_token: props.tokens.refresh_token,
           }
         
-        MessageService.getMessage(values).then(async (response) => {
+        var unnecessary_variable = MessageService.getMessage(values).then(async (response) => {
             const data = response.data
             var messages1 = await data.messages
             setMessages(messages1.map((first: any) => ({first})))
 
-
-            console.log(data)  
-            return messages1
+            messages_fetched = messages1
 
           })
           .catch((error) => {
@@ -254,17 +294,19 @@ const MessagePage = (props: any) => {
                 setMessages(messages1.map((first: any) => ({first})))
                 console.log(data)
                 props.setMyTokens(refresh_token_data.access_token, refresh_token_data.refresh_token)
-                return messages1
+                messages_fetched = messages1
       
               })
               .catch((error) => {
-                return null
+                    
               })
             })
             .catch((error) => {
-                return null
+
             })
         })
+        var unnecessary_variable2 = await unnecessary_variable
+        return messages_fetched
     }
 
     // do poprawy warunki
@@ -275,36 +317,49 @@ const MessagePage = (props: any) => {
             if(await handleGetAesKey(rec) === false){
                 setHelperText("Cannot fetch messages!")
                 console.log("Aes fetch error")
-            }
-            else{
-                setHelperText("")
-            }                
+                return
+            }              
         }
-        // const message_fetch_result = await handleMessageFetch(rec)
-        // console.log(message_fetch_result)
-        // if(message_fetch_result === null){
-        //     setHelperText("Cannot fetch messages!")
-        //     setMessagesShown("")
-        //     console.log("Message fetch error")
-        // }
-        // else{
-        //     setHelperText("")
-        //     convertMessagesAndShow(message_fetch_result)
-        // }
+        const message_fetch_result = await handleMessageFetch(rec)
+        console.log(message_fetch_result)
+        if(message_fetch_result === null){
+            setHelperText("Cannot fetch messages!")
+            setMessagesShown("")
+            console.log("Message fetch error")
+        }
+        else{
+            setHelperText("")
+            convertMessagesAndShow(message_fetch_result, rec)
+        }
     }
 
-    const convertMessagesAndShow = (all_messages: any) => {
-        console.log("convert")
+    const convertMessagesAndShow = async (allMessages: any, rec: string) => {
         var newMessages = ""
-        console.log("All messages")
-        console.log(all_messages)
-        // for (let i = 0; i < all_messages.length; i++) {
-        //     console.log(all_messages[i])
-        //     // let obj = JSON.parse(all_messages[i])
-        //     // console.log(obj)
-        //     // console.log(typeof obj)
-        // }
+        
+        const key = aesKeys.get(rec)
+        const initializationVector = initializationVectors.get(rec)
 
+        let msg = ""
+
+        for (let i = 0; i < allMessages.length; i++) {
+            let obj = JSON.parse(JSON.stringify(allMessages[i]))
+            let direction = ""
+            for (let k in obj){
+                msg = k
+                direction = obj[k]
+            }
+            msg = await AESEncryptor.decryptSymmetric(msg, key as string, initializationVector as string)
+            if(direction === 'from_first'){
+                newMessages += "(You)\n" 
+                newMessages += msg
+            }else{
+                newMessages += "(" + rec +  ")\n" 
+                newMessages += msg
+            }         
+
+        }
+        await msg
+        setMessagesShown(newMessages)
 
     }
 
