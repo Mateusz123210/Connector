@@ -576,7 +576,10 @@ def get_messages(data: BasicConfirmationForMessageFetch):
             )
     
     else:
-        return JSONResponse(status_code=response.status_code, content=response.json())
+        if response.status_code == 200:
+            return JSONResponse(status_code=response.status_code, content=response.json())
+        else:
+            return JSONResponse(status_code=response.status_code, content="")
 
 @transactional
 def get_aes_key(data):

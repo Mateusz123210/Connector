@@ -46,9 +46,9 @@ async def register(data: BasicAuthentication):
 async def confirm_registration(data: BasicConfirmationWithVerificationCode = Depends(validate_user_token_for_confirmation)):
     return services.confirm_registration1(data)
 
-@app.post("/refresh-token")
-async def refresh_token(data: RefreshToken):
-    return services.refresh_token(data)
+# @app.post("/refresh-token")
+# async def refresh_token(data: RefreshToken):
+#     return services.refresh_token(data)
 
 @app.post("/login")
 async def login(data: OAuth2PasswordRequestForm = Depends()):
