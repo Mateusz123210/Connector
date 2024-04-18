@@ -14,7 +14,16 @@ def get_messages(data, session):
                                                       session=session)
         if found_conversation:
             list1 = found_conversation["message"]
-            return {"messages": list1}
+            reversed_list_for_second_caller = []
+            for i in list1:
+                dictionary = i
+                for j in dictionary:
+                    if dictionary[j] == "from_first":
+                        dictionary[j] = "from_second"
+                    else:
+                        dictionary[j] = "from_first"
+                reversed_list_for_second_caller.append(dictionary)
+            return {"messages": reversed_list_for_second_caller}
         else:
             raise HTTPException(status_code=204)
 
