@@ -16,7 +16,7 @@ const MainPage = (props: any) => {
         
         <Grid item width={"50%"}  marginTop={15} >
             <Typography variant="h1" textAlign={"center"} color={"#0C4359"}>
-                Welcome. To start, login or create account!
+                Welcome! To start, login or create account.
             </Typography>
         </Grid>
     )

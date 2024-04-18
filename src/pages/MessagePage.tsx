@@ -44,7 +44,7 @@ const MessagePage = (props: any) => {
 
 
     const handleGetAvailableCallers = async () => {
-        const values: Caller = {
+        var values: Caller = {
             email: props.email,
             access_token: props.tokens.access_token,
         }
@@ -135,7 +135,7 @@ const MessagePage = (props: any) => {
 
     const handleGetAesKey = async (caller: string): Promise<boolean> => {
         var fetched = false
-        const values: Key = {
+        var values: Key = {
             email: props.email,
             access_token: props.tokens.access_token,
             receiver: caller
@@ -214,7 +214,7 @@ const MessagePage = (props: any) => {
         // var hashedMessage = 
 
 
-        const values: SendMessage = {
+        var values: SendMessage = {
             email: props.email,
             access_token: props.tokens.access_token,
             message: encrypted,
@@ -226,7 +226,7 @@ const MessagePage = (props: any) => {
             refresh_token: props.tokens.refresh_token,
           }
         
-        MessageService.sendMessage(values).then((response) => {
+        var unnecessary_variable = MessageService.sendMessage(values).then((response) => {
             console.log("message sent")
           })
           .catch((error) => {
@@ -249,7 +249,7 @@ const MessagePage = (props: any) => {
         
             })
         })
-
+        await unnecessary_variable
         const messagesFetched = await handleMessageFetch(currentReceiver)
         console.log("messagetcheesFd")
         console.log(messagesFetched)
@@ -263,7 +263,7 @@ const MessagePage = (props: any) => {
 
     const handleMessageFetch = async (rec: string) => {
         var messages_fetched = null
-        const values: FetchMessage = {
+        var values: FetchMessage = {
             email: props.email,
             access_token: props.tokens.access_token,
             caller: rec
@@ -275,22 +275,27 @@ const MessagePage = (props: any) => {
           }
         
         var unnecessary_variable = MessageService.getMessage(values).then(async (response) => {
-            const data = response.data
-            var messages1 = await data.messages
-            setMessages(messages1.map((first: any) => ({first})))
+            if(response.status == 200){
+                const data = response.data
+                var messages1 = data.messages
+                setMessages(messages1.map((first: any) => ({first})))
 
-            messages_fetched = messages1
+                messages_fetched = messages1
+            }else{
+                setMessages([])
+                messages_fetched = []
+            }
 
           })
           .catch((error) => {
             
             RefreshTokenService.getNewToken(refreshTokenValues).then(async (response) => {
-              const refresh_token_data = (await response).data
+              const refresh_token_data = response.data
               values.access_token = refresh_token_data.access_token
       
               MessageService.getMessage(values).then(async (response) => {
                 const data = response.data
-                var messages1 = await data.messages
+                var messages1 = data.messages
                 setMessages(messages1.map((first: any) => ({first})))
                 console.log(data)
                 props.setMyTokens(refresh_token_data.access_token, refresh_token_data.refresh_token)
@@ -309,7 +314,6 @@ const MessagePage = (props: any) => {
         return messages_fetched
     }
 
-    // do poprawy warunki
     const handleChangeReceiver = async (rec: string) => { 
         setCurrentReceiver(rec)
         setMessageForm("")
@@ -448,46 +452,13 @@ const MessagePage = (props: any) => {
             </Grid>
             
 
-            {/* <Typography textAlign={"start"} color={"#0C4359"} style={{marginTop: '50px', fontSize: 24}}>
-                Receiver
+            <Typography textAlign={"start"} color={"#fe0000"} style={{marginTop: '5px', fontSize: 24}}>
+                {helperText}
             </Typography>
 
-            <TextField
-                style={{marginTop: '20px'}}
-                id="receiver"
-                fullWidth
-                value={receiver}
-                onChange={(event) =>
-                    setReceiver(event.target.value)
-                }
-                helperText={helperText}>
-            </TextField>
-            <Typography textAlign={"start"} color={"#0C4359"} style={{marginTop: '50px', fontSize: 24}}>
-                Message
-            </Typography>
-            <TextField
-                style={{marginTop: '20px'}}
-                id="message"
-                fullWidth
-                value={messageForm}
-                onChange={(event) =>
-                    setMessageForm(event.target.value)
-                }>
-            </TextField>
-
-            <Button  style={{background: '#214757', fontSize: 28, width:"100%", marginTop: 40}}
-                onClick={handleMessageSend}>
-                Send
-            </Button>
-            <Button  style={{background: '#214757', fontSize: 28, width:"100%", marginTop: 40}}
-                onClick={handleMessageFetch}>
-                RefreshMessages
-            </Button> */}
 
         </Grid>
     )
-
-
 
 }
 

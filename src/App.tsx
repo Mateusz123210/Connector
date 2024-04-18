@@ -125,7 +125,7 @@ const App = () => {
     setRegAndLogStatus({...regAndLogStatus, logged: false})
   }
 
-  const logout = () => {
+  const logout = async () => {
     const values: Logout = {
       email: email,
       access_token: tokens.access_token,
@@ -136,7 +136,7 @@ const App = () => {
       refresh_token: tokens.refresh_token,
     }
 
-    LoginService.logout(values).then((response) => {
+    var unnecessary_variable = await LoginService.logout(values).then((response) => {
       setMyTokens("", "")
       setMyEmail("")
       hideMenuOnAppBar()
@@ -165,7 +165,7 @@ const App = () => {
   
       })
     })
-
+    var unnecessary_variable2 = await unnecessary_variable
     return false
   }
 

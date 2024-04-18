@@ -110,7 +110,9 @@ const ResponsiveAppBar = (props: any) => {
                     {/* <MenuItem key="Change password" onClick={handleCloseUserMenu}>
                         <Typography textAlign="center">Change password</Typography>
                     </MenuItem> */}
-
+                    <MenuItem key="Messages" onClick={(e) => navigate("/messages")}>
+                        <Typography textAlign="center">Messages</Typography>
+                    </MenuItem>
                     <MenuItem key="Logout" onClick={handleLogout}>
                         <Typography textAlign="center">Logout</Typography>
                     </MenuItem>
