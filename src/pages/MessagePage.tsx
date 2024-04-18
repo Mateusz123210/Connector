@@ -352,9 +352,11 @@ const MessagePage = (props: any) => {
             if(direction === 'from_first'){
                 newMessages += "(You)\n" 
                 newMessages += msg
+                newMessages += "\n"
             }else{
                 newMessages += "(" + rec +  ")\n" 
-                newMessages += msg
+                newMessages += msg 
+                newMessages += "\n"
             }         
 
         }
