@@ -9,11 +9,11 @@ def get_user(user_id: int, db):
 
 @db 
 def get_available_callers1(user_id, db):
-    return db.query(models.Key).filter(models.Key.first_user_id != user_id).all()
+    return db.query(models.Key).filter(models.Key.first_user_id == user_id).all()
 
 @db 
 def get_available_callers2(user_id, db):
-    return db.query(models.Key).filter(models.Key.second_user_id != user_id).all()
+    return db.query(models.Key).filter(models.Key.second_user_id == user_id).all()
 
 @db
 def get_user_by_email(email: str, db):

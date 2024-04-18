@@ -584,6 +584,12 @@ def get_messages(data: BasicConfirmationForMessageFetch):
 @transactional
 def get_aes_key(data):
     receiver = crud.get_user_by_email(data.receiver)
+    if data.receiver == data.email:
+        raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Sender cannot be the same, as receiver!",
+            )
+
     if receiver is None:
         raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -625,8 +631,8 @@ def get_available_callers(data):
                 detail="User does not exist")
     fetched1 = crud.get_available_callers1(db_user.id)
     fetched2 = crud.get_available_callers2(db_user.id)
-    callers1 = [crud.get_user(x.first_user_id).email for x in fetched1]
-    callers2 = [crud.get_user(x.second_user_id).email for x in fetched2]
+    callers1 = [crud.get_user(x.second_user_id).email for x in fetched1]
+    callers2 = [crud.get_user(x.first_user_id).email for x in fetched2]
     callers = callers1 + callers2
 
     return {"message": "callers fetched", "callers": callers}
