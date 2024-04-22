@@ -5,8 +5,21 @@ import uvicorn
 from schemas import MessageSending, MessagesDeleting, MessagesFetching
 from deps import validate_token_for_message_fetching, validate_token_for_message_sending, \
     validate_token_for_messages_deleting
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+origins = [
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["POST"],
+    allow_headers=["*"],
+)
 
 @app.post("/send-message")
 async def send_message(data: MessageSending = Depends(validate_token_for_message_sending)):
