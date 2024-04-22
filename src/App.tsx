@@ -150,7 +150,6 @@ const App = () => {
         values.access_token = data.access_token
 
         LoginService.logout(values).then((response) => {
-          console.log("C")
           setMyTokens("", "")
           setMyEmail("")
           hideMenuOnAppBar()

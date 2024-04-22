@@ -41,7 +41,6 @@ const RegisterPage = (props: any) => {
         var email_error = ""
         var password_error = ""
         if(!Validator.validateEmail(credentials.email)){
-            console.log("invalid")
             email_error = Validator.invalidEmailMessage
             success = false
         }
@@ -72,7 +71,6 @@ const RegisterPage = (props: any) => {
         })
     }
 
-
     useEffect(() => {
         clearHelperTexts()
         // props.setRegAndLogStatus({
@@ -83,11 +81,6 @@ const RegisterPage = (props: any) => {
 
 
     }, [])
-
-
-
-
-
 
     return(
         <Grid minWidth={"30%"}>

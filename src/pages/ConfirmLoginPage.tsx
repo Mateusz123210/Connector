@@ -18,12 +18,11 @@ const ConfirmLoginPage = (props: any) => {
     }
 
     const handleLoginConfirmation = () => {
-        console.log("handling")
         if(!Validator.validateVerificationCode(verificationCode)){
             setHelperText(Validator.invalidVerificationCodeMessage)
             return
         }
-        console.log(props)
+        
         const values: ConfirmLogin = {
             email: props.email,
             access_token: props.tokens.access_token,
