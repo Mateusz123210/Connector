@@ -84,7 +84,7 @@ def register(data: BasicAuthentication):
 def confirm_registration1(data: BasicConfirmationWithVerificationCode):
     result = confirm_registration(data)
     if "exception" in result.keys():
-        raise HTTPException(status_code=403, detail=result["exception"])
+        raise HTTPException(status_code=400, detail=result["exception"])
     else:
         return result
 
@@ -92,9 +92,9 @@ def confirm_registration1(data: BasicConfirmationWithVerificationCode):
 def confirm_registration(data: BasicConfirmationWithVerificationCode):
     user = crud.get_user_by_email(email=data.email)
     if user is None:
-        raise HTTPException(status_code=403, detail="User does not exist!")
+        raise HTTPException(status_code=400, detail="User does not exist!")
     if user.is_active is True:
-        raise HTTPException(status_code=403, detail="User is active!")
+        raise HTTPException(status_code=400, detail="User is active!")
     utc=pytz.UTC
     verification_timeout = utc.localize(user.registration_confirmation_code_expiration_time)
     datetime_now = datetime.now(UTC)
@@ -117,9 +117,9 @@ def confirm_registration(data: BasicConfirmationWithVerificationCode):
 def refresh_token(data):
     db_user = crud.get_user_by_email(email=data.email)
     if db_user is None:
-        raise HTTPException(status_code=403, detail="User does not exist!")
+        raise HTTPException(status_code=400, detail="User does not exist!")
     if db_user.is_active is False:
-        raise HTTPException(status_code=403, detail="User is not active!")
+        raise HTTPException(status_code=400, detail="User is not active!")
     db_user_tokens = crud.get_user_tokens(db_user)
     found_token = None
 
@@ -158,7 +158,7 @@ def refresh_token(data):
                 headers={"WWW-Authenticate": "Bearer"},
             )
     if found_token.logged is False:
-        raise HTTPException(status_code=403, detail="User not logged!")
+        raise HTTPException(status_code=400, detail="User not logged!")
 
     access_token_key = jwt_token_generator.generate_jwt_secret_key()
     while check_access_token_key(db_user, access_token_key) is False:
@@ -188,7 +188,7 @@ def login(data: OAuth2PasswordRequestForm = Depends()):
     if db_user is None:
         raise HTTPException(status_code=400, detail="Invalid username or password")
     if db_user.is_active is False:
-        raise HTTPException(status_code=403, detail="User is not active!")
+        raise HTTPException(status_code=400, detail="User is not active!")
     hashed_password = main.objects[1].hash_password(data.password)
     if hashed_password != db_user.password:
         raise HTTPException(status_code=400, detail="Invalid username or password")
@@ -220,7 +220,7 @@ def login(data: OAuth2PasswordRequestForm = Depends()):
 def confirm_login1(data: BasicConfirmationWithVerificationCode):
     result = confirm_login(data)
     if "exception" in result.keys():
-        raise HTTPException(status_code=403, detail=result["exception"])
+        raise HTTPException(status_code=400, detail=result["exception"])
     else:
         return result
 
@@ -228,9 +228,9 @@ def confirm_login1(data: BasicConfirmationWithVerificationCode):
 def confirm_login(data: BasicConfirmationWithVerificationCode):
     user = crud.get_user_by_email(email=data.email)
     if user is None:
-        raise HTTPException(status_code=403, detail="User does not exist!")
+        raise HTTPException(status_code=400, detail="User does not exist!")
     if user.is_active is False:
-        raise HTTPException(status_code=403, detail="User is not active!")
+        raise HTTPException(status_code=400, detail="User is not active!")
 
     db_user_tokens = crud.get_user_tokens(user)
     found_token = None
@@ -268,9 +268,9 @@ def confirm_login(data: BasicConfirmationWithVerificationCode):
                 headers={"WWW-Authenticate": "Bearer"},
             )
     if found_token.logged is True:
-        raise HTTPException(status_code=403, detail="You are currently logged!")
+        raise HTTPException(status_code=400, detail="You are currently logged!")
     if found_token.verification_code_type is not None and found_token.verification_code_type != "login":
-        raise HTTPException(status_code=403, detail="Operation not permitted!")
+        raise HTTPException(status_code=400, detail="Operation not permitted!")
     utc=pytz.UTC
     token_timeout = utc.localize(found_token.verification_code_expiration_time)
     datetime_now = datetime.now(UTC)
@@ -311,7 +311,7 @@ def delete_account(data: BasicConfirmationForDeleteAccount):
     if db_user is None:
         raise HTTPException(status_code=400, detail="Invalid username or password")
     if db_user.is_active is False:
-        raise HTTPException(status_code=403, detail="User is not active!")
+        raise HTTPException(status_code=400, detail="User is not active!")
     hashed_password = main.objects[1].hash_password(data.password)
     if hashed_password != db_user.password:
         raise HTTPException(status_code=400, detail="Invalid username or password")
@@ -627,7 +627,7 @@ def get_available_callers(data):
     db_user = crud.get_user_by_email(email=data.email)
     if db_user is None:
         raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
+                status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User does not exist")
     fetched1 = crud.get_available_callers1(db_user.id)
     fetched2 = crud.get_available_callers2(db_user.id)

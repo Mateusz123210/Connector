@@ -12,8 +12,8 @@ class MailSenderExecutor():
     def load(self):
         self.port= 587
         self.smtp_server = 'smtp.office365.com'
-        self.sender_email = 'connector.communicator@outlook.com'
-        key = b'sWRlN54aPzceRZdPMq4NPWBY9k_a9D899nV3hOdNrgg='
+        self.sender_email = 'connectorapp@outlook.com'
+        key = b'Xvkz0IbGw4GviIZVtYXbhAYBKOOcb0srn7mRm_scVY4='
         f = Fernet(key)
 
         with open("./app/keys/outlook_key.env", "rb") as encrypted_file:
@@ -26,10 +26,10 @@ class MailSenderExecutor():
     
     def start_connection_with_email_server(self):
         self.server = smtplib.SMTP(self.smtp_server, self.port)
-        # self.server.ehlo()
-        # self.server.starttls(context=self.context)
-        # self.server.ehlo()
-        # self.server.login(self.sender_email, self.password)
+        self.server.ehlo()
+        self.server.starttls(context=self.context)
+        self.server.ehlo()
+        self.server.login(self.sender_email, self.password)
 
     def quit_connection_with_email_server(self):
         self.server.quit()

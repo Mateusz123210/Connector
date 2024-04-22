@@ -3,7 +3,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from cryptography.fernet import Fernet
 
-key = b'wLVkugNZXHJESDEarg_xUnc7JHaUck1lkGECooRD2OA='
+key = b'R_rw02I6agqWA-NqsQdqTgKy6GL_5vA8YMqIhLV23PU='
 f = Fernet(key)
 
 with open("./app/keys/db_key.env", "rb") as encrypted_file:
@@ -11,11 +11,9 @@ with open("./app/keys/db_key.env", "rb") as encrypted_file:
 
 SQLALCHEMY_DATABASE_URL = f.decrypt(encrypted).decode("utf-8")
 
-# TO DO Connecting with database using SSL/TLS
-
-
 engine = create_engine(
-    SQLALCHEMY_DATABASE_URL
+    SQLALCHEMY_DATABASE_URL,
+    connect_args={'sslmode':'require'}
 )
 SessionMaker = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
