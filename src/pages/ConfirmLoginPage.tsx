@@ -5,8 +5,6 @@ import { useNavigate } from "react-router-dom"
 import LoginService, { ConfirmLogin, ConfirmLoginResponse } from "../services/loginService"
 
 
-
-
 const ConfirmLoginPage = (props: any) => {
     const navigate = useNavigate()
     const [verificationCode, setVerificationCode] = useState<string>("")
@@ -22,7 +20,7 @@ const ConfirmLoginPage = (props: any) => {
             setHelperText(Validator.invalidVerificationCodeMessage)
             return
         }
-        
+
         const values: ConfirmLogin = {
             email: props.email,
             access_token: props.tokens.access_token,
@@ -39,8 +37,6 @@ const ConfirmLoginPage = (props: any) => {
             setHelperText(error.response.data.detail)
         }))
     }
-
-
 
     return(
         <Grid minWidth={"30%"}>
@@ -72,8 +68,6 @@ const ConfirmLoginPage = (props: any) => {
 
         </Grid>
     )
-
-
 
 }
 

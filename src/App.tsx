@@ -14,30 +14,30 @@ import ForbiddenPage from "./pages/ForbiddenPage";
 import LoginService, { Logout } from "./services/loginService"
 import refreshTokenService, { RefreshToken } from "./services/refreshTokenService";
 
-const getWindowDimensions = () => {
-  const { innerWidth: width, innerHeight: height } = window;
-  return {
-    width,
-    height,
-  };
-};
+// const getWindowDimensions = () => {
+//   const { innerWidth: width, innerHeight: height } = window;
+//   return {
+//     width,
+//     height,
+//   };
+// };
 
-const useWindowDimensions = () => {
-  const [windowDimensions, setWindowDimensions] = useState(
-    getWindowDimensions()
-  );
+// const useWindowDimensions = () => {
+//   const [windowDimensions, setWindowDimensions] = useState(
+//     getWindowDimensions()
+//   );
 
-  useEffect(() => {
-    function handleResize() {
-      setWindowDimensions(getWindowDimensions());
-    }
+//   useEffect(() => {
+//     function handleResize() {
+//       setWindowDimensions(getWindowDimensions());
+//     }
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+//     window.addEventListener("resize", handleResize);
+//     return () => window.removeEventListener("resize", handleResize);
+//   }, []);
 
-  return windowDimensions;
-};
+//   return windowDimensions;
+// };
 
 const theme = createTheme(
   {
@@ -168,16 +168,12 @@ const App = () => {
     return false
   }
 
-
-
-  let a = useWindowDimensions();
+  // let a = useWindowDimensions();
   return (
     <React.StrictMode>
       <BrowserRouter>
         <ThemeProvider theme={theme}>
           <Grid container
-              // width={a.width}
-              // justifyContent="center"
               justifyContent="center"
             >
               <ResponsiveAppBar logged={regAndLogStatus.logged} blocked={regAndLogStatus.blocked} logout={logout}  />
@@ -193,9 +189,7 @@ const App = () => {
                         tokens={tokens} setTokens={setTokens} />} />
                       <Route path="/forbidden" element={<ForbiddenPage />} />
                       <Route path="/*" element={<NotFoundPage />} />
-                      
               </Routes>
-            
           </Grid>
         </ThemeProvider>
       </BrowserRouter>

@@ -15,7 +15,6 @@ const ConfirmRegisterPage = (props: any) => {
         setHelperText("")
     }
 
-
     const handleRegistrationConfirmation = () => {
         if(!Validator.validateVerificationCode(verificationCode)){
             setHelperText(Validator.invalidVerificationCodeMessage)
@@ -65,8 +64,6 @@ const ConfirmRegisterPage = (props: any) => {
 
         </Grid>
     )
-
-
 
 }
 

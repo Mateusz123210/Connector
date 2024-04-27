@@ -32,4 +32,5 @@ class RegistrationService {
         return axios.post(`${this.apiUrl}/confirm-registration`, confirmRegistration)
     }
 }
+
 export default new RegistrationService();

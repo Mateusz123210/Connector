@@ -15,4 +15,5 @@ class RefreshTokenService{
         return axios.post(`${this.apiUrl}/refresh-token`, refreshToken)
     }
 }   
+
 export default new RefreshTokenService

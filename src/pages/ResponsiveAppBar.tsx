@@ -10,7 +10,6 @@ import { Grid } from '@mui/material';
 import { useNavigate } from "react-router-dom";
 import { RegistrationAndLoginStatus } from '../App';
 
-const settings = ['Change password', 'Logout'];
 
 const ResponsiveAppBar = (props: any) => {
     

@@ -6,7 +6,6 @@ class Validator{
         big letter, small letter, digit and special character"
     invalidVerificationCodeMessage: string = "Verification code should contains of exactly 8 digits"
 
-
     validateEmail = (email: string) => {
         
         return /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(email);
@@ -56,4 +55,5 @@ class Validator{
         return /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/.test(text)
     }
 }
+
 export default new Validator()

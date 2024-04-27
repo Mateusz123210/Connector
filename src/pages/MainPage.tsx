@@ -7,9 +7,6 @@ const MainPage = (props: any) => {
     //         blocked: false
     //     })
 
-
-
-
     // }, [])
 
     return(
@@ -20,8 +17,6 @@ const MainPage = (props: any) => {
             </Typography>
         </Grid>
     )
-
-
 
 }
 

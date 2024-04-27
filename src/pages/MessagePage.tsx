@@ -1,4 +1,4 @@
-import { Button, Grid, List, ListItem, ListItemButton, ListItemIcon, ListItemText, TextField, TextareaAutosize, Typography} from "@mui/material"
+import { Button, Grid, List, ListItem, ListItemButton, ListItemText, TextField, TextareaAutosize, Typography} from "@mui/material"
 import { useEffect, useState } from "react"
 import { Caller, FetchMessage, Key, SendMessage } from "../services/messageService"
 
@@ -16,7 +16,7 @@ const MessagePage = (props: any) => {
         setHelperText("")
         setAddUserHelperText("")
         setCurrentReceiver("")
-        // setMessages([])
+        setMessages([])
         handleGetAvailableCallers()
     }, [])
 
@@ -185,9 +185,6 @@ const MessagePage = (props: any) => {
         const initializationVector = initializationVectors.get(currentReceiver)
         const encrypted = (await (AESEncryptor.encryptSymmetric(messageForm, key as string, initializationVector as string))).ciphertext
 
-        // var hashedMessage = 
-
-
         var values: SendMessage = {
             email: props.email,
             access_token: props.tokens.access_token,
@@ -340,7 +337,6 @@ const MessagePage = (props: any) => {
 
     }
 
-
     return(
         <Grid container direction={"row"} justifyContent={"center"} width={"80%"}> 
 
@@ -419,14 +415,11 @@ const MessagePage = (props: any) => {
                     </Grid>
                 </Grid>
 
-
             </Grid>
-            
 
             <Typography textAlign={"start"} color={"#fe0000"} style={{marginTop: '5px', fontSize: 24}}>
                 {helperText}
             </Typography>
-
 
         </Grid>
     )

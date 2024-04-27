@@ -5,13 +5,11 @@ import LoginService, { LoginResponse } from "../services/loginService"
 import { Login } from "../services/loginService"
 import Validator from "../validators/Validator"
 
-
 export interface HelperTexts{
     loginHelperText: string,
     passwordHelperText: string,
     loginResultHelperText: string
 }
-
 
 const LoginPage = (props: any) => {
     const navigate = useNavigate()

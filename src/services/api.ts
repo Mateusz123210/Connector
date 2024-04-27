@@ -3,8 +3,9 @@
 class Api{
 
     getApi(){
-        return "http://localhost:8000"
+        return "https://127.0.0.1:8000"
     }
 
+} 
 
-} export default new Api
+export default new Api

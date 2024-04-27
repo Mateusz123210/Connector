@@ -77,9 +77,6 @@ const RegisterPage = (props: any) => {
         //     blocked: true
         // })
 
-
-
-
     }, [])
 
     return(

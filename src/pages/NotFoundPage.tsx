@@ -9,7 +9,6 @@ const NotFoundPage = () => {
             </Typography>
         </Grid>
 
-
 )};
 
 export default NotFoundPage;

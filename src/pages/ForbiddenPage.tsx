@@ -9,7 +9,6 @@ const ForbiddenPage = () => {
             </Typography>
         </Grid>
 
-
 )};
 
 export default ForbiddenPage;
