@@ -126,6 +126,7 @@ const App = () => {
   }
 
   const logout = async () => {
+    var logged_out = false
     const values: Logout = {
       email: email,
       access_token: tokens.access_token,
@@ -141,7 +142,7 @@ const App = () => {
       setMyEmail("")
       hideMenuOnAppBar()
       
-      return true
+      logged_out = true
     })
     .catch((error) => {
       
@@ -154,7 +155,7 @@ const App = () => {
           setMyEmail("")
           hideMenuOnAppBar()
 
-          return true
+          logged_out = true
         })
         .catch((error) => {
     
@@ -165,7 +166,7 @@ const App = () => {
       })
     })
     var unnecessary_variable2 = await unnecessary_variable
-    return false
+    return logged_out
   }
 
   // let a = useWindowDimensions();

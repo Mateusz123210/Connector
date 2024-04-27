@@ -32,9 +32,10 @@ const ResponsiveAppBar = (props: any) => {
         setAnchorElUser(null);
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         const result = props.logout()
-        if(result === true) 
+        
+        if(await result == true) 
             navigate("/")
     }
 
