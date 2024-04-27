@@ -224,7 +224,8 @@ const MessagePage = (props: any) => {
         await unnecessary_variable
         const messagesFetched = await handleMessageFetch(currentReceiver)
         if(messagesFetched !== null){
-            convertMessagesAndShow(messagesFetched, currentReceiver)
+            await convertMessagesAndShow(messagesFetched, currentReceiver)
+            setMessageForm("")
         }else{
             setMessagesShown("")
             setHelperText("Cannot fetch messages")
@@ -283,6 +284,15 @@ const MessagePage = (props: any) => {
         })
         var unnecessary_variable2 = await unnecessary_variable
         return messages_fetched
+    }
+
+    const handleRefresh =  async() => {
+        if(currentReceiver.length === 0){
+            await handleGetAvailableCallers()
+        }else{
+            handleChangeReceiver(currentReceiver)
+        }
+
     }
 
     const handleChangeReceiver = async (rec: string) => { 
@@ -413,6 +423,10 @@ const MessagePage = (props: any) => {
                     </Button>
 
                     </Grid>
+                    <Button  style={{background: '#8FC8F7', fontSize: 28, width:"100%", marginTop: "20px"}}
+                        onClick={handleRefresh}>
+                        Refresh
+                    </Button>
                 </Grid>
 
             </Grid>
