@@ -1,5 +1,5 @@
-from app import services
-from app.schemas import *
+import services
+from schemas import *
 
 async def validate_user_token_for_confirmation(data: BasicConfirmationWithVerificationCode) :
     return services.validate_user_token(data)

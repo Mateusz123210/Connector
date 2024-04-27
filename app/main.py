@@ -1,16 +1,18 @@
+import uvicorn
 from fastapi import FastAPI
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from contextlib import asynccontextmanager
-from .database import engine
-from .database import Base
-from app.mail.mail_sender_executor import MailSenderExecutor
-from app.hashing.password_hasher import PasswordHasher
-from app.validating import Validator
-from app.schemas import *
-from . import services
-from app.deps import *
+from database import engine
+from database import Base
+from mail.mail_sender_executor import MailSenderExecutor
+from hashing.password_hasher import PasswordHasher
+from validating import Validator
+from schemas import *
+import services
+from deps import *
 from fastapi.middleware.cors import CORSMiddleware
+import ssl
 
 objects = []
 Base.metadata.create_all(bind=engine)
@@ -98,6 +100,16 @@ async def get_available_callers(data: BasicConfirmation = Depends(validate_user_
 # async def confirm_change_password(data: BasicConfirmationWithVerificationCode = Depends(validate_user_token_for_confirmation)):
 #     return services.confirm_change_password(data)
 
+
+ssl_certfile = './ssl_certificate/cert.cer'
+ssl_keyfile = './ssl_certificate/key.pem'
+
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+ssl_context.load_cert_chain(certfile=ssl_certfile, keyfile=ssl_keyfile)
+
+
+# if __name__ == '__main__':
+#     uvicorn.run(app, port=8000, host='0.0.0.0', ssl_certfile=ssl_certfile, ssl_keyfile=ssl_keyfile)
 
 
 

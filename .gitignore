@@ -1,4 +1,5 @@
 app/keys/
+app/ssl_certificate/
 app/temp.py
 app/temp2.py
 app/temp3.py

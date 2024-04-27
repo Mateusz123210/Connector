@@ -1,7 +1,6 @@
-
-from . import models, schemas
+import models, schemas
 from datetime import datetime
-from app.decorators.database import db
+from decorators.database import db
 
 @db
 def get_user(user_id: int, db):

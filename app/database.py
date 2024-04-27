@@ -6,7 +6,7 @@ from cryptography.fernet import Fernet
 key = b'R_rw02I6agqWA-NqsQdqTgKy6GL_5vA8YMqIhLV23PU='
 f = Fernet(key)
 
-with open("./app/keys/db_key.env", "rb") as encrypted_file:
+with open("keys/db_key.env", "rb") as encrypted_file:
     encrypted = encrypted_file.read()
 
 SQLALCHEMY_DATABASE_URL = f.decrypt(encrypted).decode("utf-8")

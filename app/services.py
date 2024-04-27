@@ -1,32 +1,34 @@
-from fastapi import HTTPException, Depends, status
+from fastapi import HTTPException, Depends, Response, status
 from fastapi.responses import JSONResponse
-from app.mail import mail_sender
+from mail import mail_sender
 from fastapi.security import OAuth2PasswordRequestForm
-from . import crud
-from app.random_numbers import verification_code_generator
+
+from rabbit.send_to_queue import send_to_queue
+import crud
+from random_numbers import verification_code_generator
 from datetime import datetime, timedelta, UTC
-from app.utils import create_access_token, create_refresh_token
-from app.random_numbers import jwt_token_generator
-from app.schemas import *
-from app import main
-from app.decorators.database import transactional
-from app.aes import aes_generator
+from utils import create_access_token, create_refresh_token
+from random_numbers import jwt_token_generator
+from schemas import *
+import main
+from decorators.database import transactional
+from aes import aes_generator
 import pytz
 from jose import jwt
-from .utils import (
+from utils import (
     ALGORITHM
 )
 from pydantic import ValidationError
 import httpx
 from cryptography.fernet import Fernet
 
-with open("./app/keys/second_server_url.env") as file:
+with open("./keys/second_server_url.env") as file:
     second_server_url = file.read()
 
 key = b'ftN9pKojZezJO0q_fBOlqAT5Iwh5Y_Ybref_KvOdlMY='
 f = Fernet(key)
 
-with open("./app/keys/secret_key.env", "rb") as encrypted_file:
+with open("./keys/secret_key.env", "rb") as encrypted_file:
     encrypted = encrypted_file.read()
 
 token = f.decrypt(encrypted).decode("utf-8")
@@ -110,6 +112,7 @@ def confirm_registration(data: BasicConfirmationWithVerificationCode):
         return {"exception": "Invalid verification code"}
     crud.activate_user(user)
     crud.delete_user_tokens(user)
+    send_to_queue(data.email)
 
     return {"message": "User activated"}
 
@@ -505,7 +508,7 @@ def send_message(data: BasicConfirmationForMessageSend):
              "token": token}
 
     try:
-        response = httpx.post(url=second_server_url + "send-message", json = send_data)
+        response = httpx.post(url=second_server_url + "send-message", json = send_data, verify="./keys/cert.cer")
     except Exception:
         raise HTTPException(
                 status_code=500,
@@ -550,13 +553,12 @@ def get_messages(data: BasicConfirmationForMessageFetch):
     send_data= {"first_user": data.email, "second_user": data.caller, "token": token}
 
     try:
-        response = httpx.post(url=second_server_url + "get-messages", json = send_data)
+        response = httpx.post(url=second_server_url + "get-messages", json = send_data, verify="./keys/cert.cer")
     except Exception:
         raise HTTPException(
                 status_code=500,
                 detail="Internal Server Error",
             )
-    
     if response.status_code != 200 and response.status_code != 204:
         json_answer = None
         try:
@@ -579,7 +581,7 @@ def get_messages(data: BasicConfirmationForMessageFetch):
         if response.status_code == 200:
             return JSONResponse(status_code=response.status_code, content=response.json())
         else:
-            return JSONResponse(status_code=response.status_code, content="")
+            return Response(status_code=response.status_code)
 
 @transactional
 def get_aes_key(data):

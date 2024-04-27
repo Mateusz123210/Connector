@@ -1,4 +1,4 @@
-from app.mail.mail_sender_executor import MailSenderExecutor
+from mail.mail_sender_executor import MailSenderExecutor
 
 def send_email_with_verification_code_for_registration(executor: MailSenderExecutor, recipient: str, verification_code: str):
     subject = 'Kod autoryzacyjny - potwierdzenie rejestracji w aplikacji Connector'

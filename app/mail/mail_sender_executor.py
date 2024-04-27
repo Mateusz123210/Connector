@@ -7,7 +7,8 @@ from cryptography.fernet import Fernet
 class MailSenderExecutor():
 
     def __init__(self):
-        self.load()
+        # self.load()
+        pass
     
     def load(self):
         self.port= 587
@@ -16,7 +17,7 @@ class MailSenderExecutor():
         key = b'Xvkz0IbGw4GviIZVtYXbhAYBKOOcb0srn7mRm_scVY4='
         f = Fernet(key)
 
-        with open("./app/keys/outlook_key.env", "rb") as encrypted_file:
+        with open("keys/outlook_key.env", "rb") as encrypted_file:
             encrypted = encrypted_file.read()
 
         self.password = f.decrypt(encrypted).decode("utf-8")
