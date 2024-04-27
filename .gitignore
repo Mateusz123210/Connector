@@ -1,4 +1,4 @@
 __pycache__/
 app/keys/
 temp.py
-ssl_certificate/
+app/ssl_certificate/
