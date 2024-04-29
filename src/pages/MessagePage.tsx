@@ -393,8 +393,8 @@ const MessagePage = (props: any) => {
                 </Typography>
                 <TextareaAutosize
                     id="messages"
-                    minRows={25}
-                    maxRows={25}
+                    minRows={20}
+                    maxRows={20}
                     readOnly={true}
                     value={messagesShown}
                     style={{ width: "100%", resize: "none", background: "#CBE2EF", overflow: 'auto' }}
