@@ -13,7 +13,30 @@ import services
 from deps import *
 from fastapi.middleware.cors import CORSMiddleware
 import ssl
+from threading import Thread
+import time
 
+
+class SecondThread:
+
+    def __init__(self):
+        self.working = True
+
+    def stop_work(self):
+        self.working = False
+
+    def delete_unnecessary_data_from_database(self):
+        time_counter = 0
+        while self.working is True:
+
+            if time_counter >= 3000000:
+                time_counter = 0
+                services.delete_not_activated_users_and_all_tokens()
+            time_counter += 1
+
+            time.sleep(0.01)
+
+second_thread = SecondThread()
 objects = []
 Base.metadata.create_all(bind=engine)
 
@@ -22,9 +45,14 @@ async def lifespan(app: FastAPI):
     objects.append(MailSenderExecutor())
     objects.append(PasswordHasher())
     objects.append(Validator())
+    thread = Thread(name='daemon', target=second_thread.delete_unnecessary_data_from_database)
+    thread.start()
     yield
+    second_thread.stop_work()
+    thread.join()
     objects[0].quit_connection_with_email_server()
     objects.clear()
+    services.queue_sender.close_connection()
 
 app = FastAPI(lifespan = lifespan)
 
@@ -39,6 +67,12 @@ app.add_middleware(
     allow_methods=["POST", "GET", "OPTIONS"],
     allow_headers=["*"],
 )
+
+ssl_certfile = './ssl_certificate/cert.cer'
+ssl_keyfile = './ssl_certificate/key.pem'
+
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+ssl_context.load_cert_chain(certfile=ssl_certfile, keyfile=ssl_keyfile)
 
 @app.post("/register")
 async def register(data: BasicAuthentication):
@@ -99,13 +133,6 @@ async def get_available_callers(data: BasicConfirmation = Depends(validate_user_
 # @app.post("/confirm-change-password")
 # async def confirm_change_password(data: BasicConfirmationWithVerificationCode = Depends(validate_user_token_for_confirmation)):
 #     return services.confirm_change_password(data)
-
-
-ssl_certfile = './ssl_certificate/cert.cer'
-ssl_keyfile = './ssl_certificate/key.pem'
-
-ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-ssl_context.load_cert_chain(certfile=ssl_certfile, keyfile=ssl_keyfile)
 
 
 # if __name__ == '__main__':

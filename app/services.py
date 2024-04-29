@@ -2,8 +2,7 @@ from fastapi import HTTPException, Depends, Response, status
 from fastapi.responses import JSONResponse
 from mail import mail_sender
 from fastapi.security import OAuth2PasswordRequestForm
-
-from rabbit.send_to_queue import send_to_queue
+from rabbit.send_to_queue import QueueSender
 import crud
 from random_numbers import verification_code_generator
 from datetime import datetime, timedelta, UTC
@@ -32,6 +31,35 @@ with open("./keys/secret_key.env", "rb") as encrypted_file:
     encrypted = encrypted_file.read()
 
 token = f.decrypt(encrypted).decode("utf-8")
+
+queue_sender = QueueSender()
+
+@transactional
+def delete_not_activated_users_and_all_tokens():
+    users = crud.get_all_users()
+    utc=pytz.UTC
+    for db_user in users:
+        if db_user and db_user.is_active is False: 
+
+            datetime_now = datetime.now(UTC)
+            confirmation_code_expiration_time = utc.localize(db_user.registration_confirmation_code_expiration_time)
+
+            if datetime_now > confirmation_code_expiration_time or \
+                db_user.registration_confirmation_code_enter_attempts >=3:
+                crud.delete_user(db_user)
+    
+    tokens = crud.get_all_tokens()
+    for token in tokens:
+        if token.refresh_token is not None:
+            datetime_now = datetime.now(UTC)
+            token_expiration_time = utc.localize(token.refresh_token_expiration_time)
+            if datetime_now > token_expiration_time:
+                crud.delete_token(token)
+        else:
+            datetime_now = datetime.now(UTC)
+            token_expiration_time = utc.localize(token.access_token_expiration_time)
+            if datetime_now > token_expiration_time:
+                crud.delete_token(token)
 
 @transactional
 def register(data: BasicAuthentication):
@@ -112,7 +140,7 @@ def confirm_registration(data: BasicConfirmationWithVerificationCode):
         return {"exception": "Invalid verification code"}
     crud.activate_user(user)
     crud.delete_user_tokens(user)
-    send_to_queue(data.email)
+    queue_sender.send_to_queue(data.email)
 
     return {"message": "User activated"}
 
@@ -581,7 +609,7 @@ def get_messages(data: BasicConfirmationForMessageFetch):
         if response.status_code == 200:
             return JSONResponse(status_code=response.status_code, content=response.json())
         else:
-            return Response(status_code=response.status_code)
+            return Response(status_code=204)
 
 @transactional
 def get_aes_key(data):

@@ -3,6 +3,10 @@ from datetime import datetime
 from decorators.database import db
 
 @db
+def get_all_users(db):
+    return db.query(models.User).all()
+
+@db
 def get_user(user_id: int, db):
     return db.query(models.User).filter(models.User.id == user_id).first()
 
@@ -17,6 +21,10 @@ def get_available_callers2(user_id, db):
 @db
 def get_user_by_email(email: str, db):
     return db.query(models.User).filter(models.User.email == email).first()
+
+@db
+def get_all_tokens(db):
+    return db.query(models.Token).all()
 
 @db
 def get_token(access_token, db):
