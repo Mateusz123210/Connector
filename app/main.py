@@ -79,7 +79,8 @@ async def register(data: BasicAuthentication):
     return services.register(data)
 
 @app.post("/confirm-registration")
-async def confirm_registration(data: BasicConfirmationWithVerificationCode = Depends(validate_user_token_for_confirmation)):
+async def confirm_registration(data: BasicConfirmationWithVerificationCode = 
+                               Depends(validate_user_token_for_confirmation)):
     return services.confirm_registration1(data)
 
 @app.post("/refresh-token")

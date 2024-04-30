@@ -50,6 +50,10 @@ class QueueSender:
             self.channel.basic_publish(exchange='mail-exchange', routing_key='m', body= email)
         except Exception:
             self.initialize_connection()
+            try:
+                self.channel.basic_publish(exchange='mail-exchange', routing_key='m', body= email)
+            except Exception:
+                pass
 
     def close_connection(self):
         try:

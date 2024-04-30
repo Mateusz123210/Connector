@@ -7,8 +7,7 @@ from cryptography.fernet import Fernet
 class MailSenderExecutor():
 
     def __init__(self):
-        # self.load()
-        pass
+        self.load()
     
     def load(self):
         self.port= 587

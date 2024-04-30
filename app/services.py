@@ -349,9 +349,8 @@ def delete_account(data: BasicConfirmationForDeleteAccount):
     crud.delete_user_with_keys(db_user)
 
     send_data= {"user": data.email, "token": token}
-
     try:
-        httpx.post(url=second_server_url + "delete-messages", json = send_data)
+        httpx.post(url=second_server_url + "delete-messages", json = send_data, verify="./keys/cert.cer")
     except Exception:
         raise HTTPException(
                 status_code=500,
@@ -667,17 +666,6 @@ def get_available_callers(data):
 
     return {"message": "callers fetched", "callers": callers}
 
-# @transactional
-# def reset_password(data: OAuth2PasswordRequestForm = Depends()):
-#     # email = data.username    
-#     # db_user = crud.get_user_by_email(email=email)
-#     # if db_user is None:
-#     #     raise HTTPException(status_code=400, detail="Invalid username or password")
-#     # if db_user.is_active is False:
-#     #     raise HTTPException(status_code=403, detail="User is not active!")
-#     # if main.objects[2].validate_password(data.password) is False:
-#     #     raise HTTPException(status_code=400, detail="New password is invalid")
-#     # hashed_password = main.objects[1].hash_password(data.password)
 
 
 
