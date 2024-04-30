@@ -8,7 +8,6 @@ import MenuItem from '@mui/material/MenuItem';
 import ConnectorLogo from "../assets/connector_logo_big.png"
 import { Grid } from '@mui/material';
 import { useNavigate } from "react-router-dom";
-import { RegistrationAndLoginStatus } from '../App';
 
 
 const ResponsiveAppBar = (props: any) => {
@@ -36,11 +35,18 @@ const ResponsiveAppBar = (props: any) => {
         const result = props.logout()
 
         if(await result == true) 
+            setAnchorElUser(null)
             navigate("/")
     }
 
     const navigateToMessages = () => {
+        setAnchorElUser(null)
         navigate("/messages")
+    }
+
+    const handleDeleteAccount = () => {
+        setAnchorElUser(null)
+        navigate("/delete-account")
     }
 
     return (
@@ -111,14 +117,14 @@ const ResponsiveAppBar = (props: any) => {
                     open={Boolean(anchorElUser)}
                     onClose={handleCloseUserMenu}
                     >
-                    {/* <MenuItem key="Change password" onClick={handleCloseUserMenu}>
-                        <Typography textAlign="center">Change password</Typography>
-                    </MenuItem> */}
                     <MenuItem key="Messages" onClick={navigateToMessages}>
                         <Typography textAlign="center">Messages</Typography>
                     </MenuItem>
                     <MenuItem key="Logout" onClick={handleLogout}>
                         <Typography textAlign="center">Logout</Typography>
+                    </MenuItem>
+                    <MenuItem key="DeleteAccount" onClick={handleDeleteAccount}>
+                        <Typography textAlign="center">Delete account</Typography>
                     </MenuItem>
 
                     </Menu>

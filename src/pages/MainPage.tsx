@@ -1,13 +1,6 @@
 import { Grid, Typography } from "@mui/material"
-import { useEffect, useLayoutEffect } from "react"
 
 const MainPage = (props: any) => {
-    // useEffect(() => {
-    //     props.setRegAndLogStatus({
-    //         blocked: false
-    //     })
-
-    // }, [])
 
     return(
         

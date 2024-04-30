@@ -1,6 +1,5 @@
 import React from "react";
-import {useState, useEffect} from "react"
-import {BrowserRouter, Routes, Route, useNavigate} from "react-router-dom";
+import {BrowserRouter, Routes, Route} from "react-router-dom";
 import { ThemeProvider, createTheme, Grid} from "@mui/material";
 import MainPage from "./pages/MainPage";
 import MessagePage from "./pages/MessagePage";
@@ -13,31 +12,8 @@ import ResponsiveAppBar from "./pages/ResponsiveAppBar";
 import ForbiddenPage from "./pages/ForbiddenPage";
 import LoginService, { Logout } from "./services/loginService"
 import refreshTokenService, { RefreshToken } from "./services/refreshTokenService";
+import DeleteAccountPage from "./pages/DeleteAccount";
 
-// const getWindowDimensions = () => {
-//   const { innerWidth: width, innerHeight: height } = window;
-//   return {
-//     width,
-//     height,
-//   };
-// };
-
-// const useWindowDimensions = () => {
-//   const [windowDimensions, setWindowDimensions] = useState(
-//     getWindowDimensions()
-//   );
-
-//   useEffect(() => {
-//     function handleResize() {
-//       setWindowDimensions(getWindowDimensions());
-//     }
-
-//     window.addEventListener("resize", handleResize);
-//     return () => window.removeEventListener("resize", handleResize);
-//   }, []);
-
-//   return windowDimensions;
-// };
 
 const theme = createTheme(
   {
@@ -169,7 +145,6 @@ const App = () => {
     return logged_out
   }
 
-  // let a = useWindowDimensions();
   return (
     <React.StrictMode>
       <BrowserRouter>
@@ -188,6 +163,8 @@ const App = () => {
                         setMyTokens={setMyTokens} showMenuOnAppBar={showMenuOnAppBar} />} />
                       <Route path="/messages" element={<MessagePage email={email} 
                         tokens={tokens} setTokens={setTokens} />} />
+                      <Route path="/delete-account" element={<DeleteAccountPage email={email} tokens={tokens} setMyTokens={setMyTokens} 
+                      hideMenuOnAppBar={hideMenuOnAppBar} />} />
                       <Route path="/forbidden" element={<ForbiddenPage />} />
                       <Route path="/*" element={<NotFoundPage />} />
               </Routes>
